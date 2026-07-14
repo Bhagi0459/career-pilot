@@ -1,0 +1,8 @@
+# .NET build artifacts (Backend)
+[Bb]in/
+[Oo]bj/
+*.user
+.vs/
+
+# Never commit local secret overrides
+Backend/**/appsettings.Local.json

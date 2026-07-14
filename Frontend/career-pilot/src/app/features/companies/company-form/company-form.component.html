@@ -1,0 +1,40 @@
+<div class="page-header">
+  <h2>{{ isEditMode() ? 'Edit Company' : 'Add Company' }}</h2>
+</div>
+
+@if (errorMessage()) {
+  <div class="error-banner">{{ errorMessage() }}</div>
+}
+
+<form [formGroup]="form" (ngSubmit)="submit()" class="card">
+  <div class="form-field">
+    <label for="name">Company name</label>
+    <input id="name" formControlName="name" appAutofocus />
+    @if (form.controls.name.invalid && form.controls.name.touched) {
+      <span class="field-error">Company name is required.</span>
+    }
+  </div>
+
+  <div class="form-row">
+    <div class="form-field">
+      <label for="country">Country</label>
+      <input id="country" formControlName="country" />
+    </div>
+    <div class="form-field">
+      <label for="website">Website</label>
+      <input id="website" formControlName="website" placeholder="https://example.com" />
+    </div>
+  </div>
+
+  <div class="form-field">
+    <label for="notes">Notes</label>
+    <textarea id="notes" formControlName="notes" rows="4"></textarea>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary" [disabled]="saving()">
+      {{ saving() ? 'Saving…' : 'Save' }}
+    </button>
+    <a routerLink="/companies" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>

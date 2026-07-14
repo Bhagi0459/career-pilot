@@ -1,0 +1,75 @@
+<div class="page-header">
+  <h2>{{ isEditMode() ? 'Edit Application' : 'Add Application' }}</h2>
+</div>
+
+@if (errorMessage()) {
+  <div class="error-banner">{{ errorMessage() }}</div>
+}
+
+<form [formGroup]="form" (ngSubmit)="submit()" class="card">
+  <div class="form-field">
+    <label for="roleTitle">Role title</label>
+    <input id="roleTitle" formControlName="roleTitle" appAutofocus placeholder="e.g. Senior Frontend Engineer" />
+    @if (form.controls.roleTitle.invalid && form.controls.roleTitle.touched) {
+      <span class="field-error">Role title is required.</span>
+    }
+  </div>
+
+  <div class="form-row">
+    <div class="form-field">
+      <label for="companyId">Company</label>
+      <select id="companyId" formControlName="companyId" (change)="onCompanyChange()">
+        <option [ngValue]="0" disabled>Select a company</option>
+        @for (company of companies(); track company.id) {
+          <option [ngValue]="company.id">{{ company.name }}</option>
+        }
+      </select>
+      @if (form.controls.companyId.invalid && form.controls.companyId.touched) {
+        <span class="field-error">Select a company.</span>
+      }
+    </div>
+
+    <div class="form-field">
+      <label for="recruiterId">Recruiter (optional)</label>
+      <select id="recruiterId" formControlName="recruiterId">
+        <option [ngValue]="0">No recruiter</option>
+        @for (recruiter of filteredRecruiters(); track recruiter.id) {
+          <option [ngValue]="recruiter.id">{{ recruiter.name }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-field">
+      <label for="status">Status</label>
+      <select id="status" formControlName="status">
+        @for (status of statuses; track status) {
+          <option [value]="status">{{ status }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="form-field">
+      <label for="appliedDate">Applied date</label>
+      <input id="appliedDate" type="date" formControlName="appliedDate" />
+    </div>
+  </div>
+
+  <div class="form-field">
+    <label for="country">Country</label>
+    <input id="country" formControlName="country" placeholder="e.g. Germany" />
+  </div>
+
+  <div class="form-field">
+    <label for="notes">Notes</label>
+    <textarea id="notes" formControlName="notes" rows="4"></textarea>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary" [disabled]="saving()">
+      {{ saving() ? 'Saving…' : 'Save' }}
+    </button>
+    <a routerLink="/applications" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>

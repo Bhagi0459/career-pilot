@@ -1,0 +1,52 @@
+<div class="page-header">
+  <h2>Interviews</h2>
+  <a routerLink="/interviews/new" class="btn btn-primary">+ Add Interview</a>
+</div>
+
+@if (error()) {
+  <div class="error-banner">{{ error() }}</div>
+}
+
+@if (loading()) {
+  <app-loading-spinner />
+} @else if (interviews().length === 0) {
+  <app-empty-state title="No interviews scheduled" message="Add an interview and link it to one of your applications.">
+    <a routerLink="/interviews/new" class="btn btn-primary">+ Add Interview</a>
+  </app-empty-state>
+} @else {
+  <div class="card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Round</th>
+          <th>Application</th>
+          <th>Scheduled</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (interview of interviews(); track interview.id) {
+          <tr>
+            <td>{{ interview.round }}</td>
+            <td>{{ interview.roleTitle }} · {{ interview.companyName }}</td>
+            <td>{{ interview.scheduledAt | timeAgo }}</td>
+            <td><app-status-badge [status]="interview.status" /></td>
+            <td class="table-actions">
+              <a [routerLink]="['/interviews', interview.id, 'edit']" class="icon-btn">Edit</a>
+              <button type="button" class="icon-btn" (click)="confirmDelete(interview)">Delete</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (pendingDelete(); as interview) {
+  <app-confirm-dialog
+    [message]="'Delete the ' + interview.round + ' interview for ' + interview.roleTitle + '?'"
+    (confirmed)="deleteConfirmed()"
+    (cancelled)="cancelDelete()"
+  />
+}

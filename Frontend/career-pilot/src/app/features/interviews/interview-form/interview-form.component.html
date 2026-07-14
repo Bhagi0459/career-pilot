@@ -1,0 +1,58 @@
+<div class="page-header">
+  <h2>{{ isEditMode() ? 'Edit Interview' : 'Add Interview' }}</h2>
+</div>
+
+@if (errorMessage()) {
+  <div class="error-banner">{{ errorMessage() }}</div>
+}
+
+<form [formGroup]="form" (ngSubmit)="submit()" class="card">
+  <div class="form-field">
+    <label for="jobApplicationId">Application</label>
+    <select id="jobApplicationId" formControlName="jobApplicationId">
+      <option [ngValue]="0" disabled>Select an application</option>
+      @for (application of applications(); track application.id) {
+        <option [ngValue]="application.id">{{ application.roleTitle }} · {{ application.companyName }}</option>
+      }
+    </select>
+    @if (form.controls.jobApplicationId.invalid && form.controls.jobApplicationId.touched) {
+      <span class="field-error">Select an application.</span>
+    }
+  </div>
+
+  <div class="form-row">
+    <div class="form-field">
+      <label for="round">Round</label>
+      <input id="round" formControlName="round" appAutofocus placeholder="e.g. Technical screen" />
+      @if (form.controls.round.invalid && form.controls.round.touched) {
+        <span class="field-error">Round is required.</span>
+      }
+    </div>
+
+    <div class="form-field">
+      <label for="scheduledAt">Date &amp; time</label>
+      <input id="scheduledAt" type="datetime-local" formControlName="scheduledAt" />
+    </div>
+  </div>
+
+  <div class="form-field">
+    <label for="status">Status</label>
+    <select id="status" formControlName="status">
+      @for (status of statuses; track status) {
+        <option [value]="status">{{ status }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="form-field">
+    <label for="notes">Notes / feedback</label>
+    <textarea id="notes" formControlName="notes" rows="4"></textarea>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary" [disabled]="saving()">
+      {{ saving() ? 'Saving…' : 'Save' }}
+    </button>
+    <a routerLink="/interviews" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>

@@ -1,0 +1,58 @@
+<div class="page-header">
+  <h2>Recruiters</h2>
+  <a routerLink="/recruiters/new" class="btn btn-primary">+ Add Recruiter</a>
+</div>
+
+@if (error()) {
+  <div class="error-banner">{{ error() }}</div>
+}
+
+@if (loading()) {
+  <app-loading-spinner />
+} @else if (recruiters().length === 0) {
+  <app-empty-state title="No recruiters yet" message="Add a recruiter and link them to a company to keep track of your contacts.">
+    <a routerLink="/recruiters/new" class="btn btn-primary">+ Add Recruiter</a>
+  </app-empty-state>
+} @else {
+  <div class="card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Company</th>
+          <th>Email</th>
+          <th>LinkedIn</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (recruiter of recruiters(); track recruiter.id) {
+          <tr>
+            <td>{{ recruiter.name }}</td>
+            <td>{{ recruiter.companyName }}</td>
+            <td>{{ recruiter.email || '—' }}</td>
+            <td>
+              @if (recruiter.linkedInUrl) {
+                <a [href]="recruiter.linkedInUrl" target="_blank" rel="noopener">Profile</a>
+              } @else {
+                —
+              }
+            </td>
+            <td class="table-actions">
+              <a [routerLink]="['/recruiters', recruiter.id, 'edit']" class="icon-btn">Edit</a>
+              <button type="button" class="icon-btn" (click)="confirmDelete(recruiter)">Delete</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (pendingDelete(); as recruiter) {
+  <app-confirm-dialog
+    [message]="'Delete ' + recruiter.name + '? Applications linked to them will keep their record but lose this contact.'"
+    (confirmed)="deleteConfirmed()"
+    (cancelled)="cancelDelete()"
+  />
+}

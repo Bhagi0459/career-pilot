@@ -1,0 +1,103 @@
+<div class="page-header">
+  <h2>Applications</h2>
+  <a routerLink="/applications/new" class="btn btn-primary">+ Add Application</a>
+</div>
+
+<div class="card filters-bar">
+  <div class="form-field">
+    <label for="search">Search</label>
+    <input id="search" [formControl]="searchControl" placeholder="Role or company…" />
+  </div>
+
+  <div class="form-field">
+    <label for="status">Status</label>
+    <select id="status" (change)="onStatusChange($any($event.target).value)">
+      <option value="" [selected]="statusFilter() === ''">All statuses</option>
+      @for (status of statuses; track status) {
+        <option [value]="status" [selected]="statusFilter() === status">{{ status }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="form-field">
+    <label for="country">Country</label>
+    <input
+      id="country"
+      [formControl]="countryControl"
+      placeholder="Filter by country…"
+      (change)="onCountryChange(countryControl.value)"
+    />
+  </div>
+
+  <div class="form-field">
+    <label for="sort">Sort by</label>
+    <select id="sort" (change)="onSortChange($any($event.target).value)">
+      <option value="appliedDate_desc" [selected]="sort() === 'appliedDate_desc'">Applied date (newest)</option>
+      <option value="appliedDate_asc" [selected]="sort() === 'appliedDate_asc'">Applied date (oldest)</option>
+      <option value="roleTitle_asc" [selected]="sort() === 'roleTitle_asc'">Role (A–Z)</option>
+      <option value="roleTitle_desc" [selected]="sort() === 'roleTitle_desc'">Role (Z–A)</option>
+      <option value="company_asc" [selected]="sort() === 'company_asc'">Company (A–Z)</option>
+      <option value="company_desc" [selected]="sort() === 'company_desc'">Company (Z–A)</option>
+    </select>
+  </div>
+</div>
+
+@if (error()) {
+  <div class="error-banner">{{ error() }}</div>
+}
+
+@if (loading()) {
+  <app-loading-spinner />
+} @else if (result().items.length === 0) {
+  <app-empty-state title="No applications found" message="Try adjusting your filters, or add your first application.">
+    <a routerLink="/applications/new" class="btn btn-primary">+ Add Application</a>
+  </app-empty-state>
+} @else {
+  <div class="card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Role</th>
+          <th>Company</th>
+          <th>Status</th>
+          <th>Country</th>
+          <th>Applied</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (application of result().items; track application.id) {
+          <tr>
+            <td>{{ application.roleTitle }}</td>
+            <td>{{ application.companyName }}</td>
+            <td><app-status-badge [status]="application.status" /></td>
+            <td>{{ application.country || '—' }}</td>
+            <td>{{ application.appliedDate | timeAgo }}</td>
+            <td class="table-actions">
+              <a [routerLink]="['/applications', application.id, 'edit']" class="icon-btn">Edit</a>
+              <button type="button" class="icon-btn" (click)="confirmDelete(application)">Delete</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (totalPages() > 1) {
+    <div class="pagination">
+      <button type="button" class="icon-btn" [disabled]="page() === 1" (click)="goToPage(page() - 1)">Previous</button>
+      <span>Page {{ page() }} of {{ totalPages() }}</span>
+      <button type="button" class="icon-btn" [disabled]="page() === totalPages()" (click)="goToPage(page() + 1)">
+        Next
+      </button>
+    </div>
+  }
+}
+
+@if (pendingDelete(); as application) {
+  <app-confirm-dialog
+    [message]="'Delete the application for ' + application.roleTitle + ' at ' + application.companyName + '? Its interviews will be removed too.'"
+    (confirmed)="deleteConfirmed()"
+    (cancelled)="cancelDelete()"
+  />
+}

@@ -1,0 +1,59 @@
+<div class="page-header">
+  <h2>Companies</h2>
+  <a routerLink="/companies/new" class="btn btn-primary">+ Add Company</a>
+</div>
+
+@if (error()) {
+  <div class="error-banner">{{ error() }}</div>
+}
+
+@if (loading()) {
+  <app-loading-spinner />
+} @else if (companies().length === 0) {
+  <app-empty-state
+    title="No companies yet"
+    message="Add the companies you're applying to so you can link recruiters and applications."
+  >
+    <a routerLink="/companies/new" class="btn btn-primary">+ Add Company</a>
+  </app-empty-state>
+} @else {
+  <div class="card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Country</th>
+          <th>Website</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (company of companies(); track company.id) {
+          <tr>
+            <td>{{ company.name }}</td>
+            <td>{{ company.country || '—' }}</td>
+            <td>
+              @if (company.website) {
+                <a [href]="company.website" target="_blank" rel="noopener">{{ company.website }}</a>
+              } @else {
+                —
+              }
+            </td>
+            <td class="table-actions">
+              <a [routerLink]="['/companies', company.id, 'edit']" class="icon-btn">Edit</a>
+              <button type="button" class="icon-btn" (click)="confirmDelete(company)">Delete</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (pendingDelete(); as company) {
+  <app-confirm-dialog
+    [message]="'Delete ' + company.name + '? This will also remove related recruiters and applications.'"
+    (confirmed)="deleteConfirmed()"
+    (cancelled)="cancelDelete()"
+  />
+}

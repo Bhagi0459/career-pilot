@@ -1,0 +1,100 @@
+<div class="page-header">
+  <h2>Dashboard</h2>
+  <a routerLink="/applications/new" class="btn btn-primary">+ Add Application</a>
+</div>
+
+@if (error()) {
+  <div class="error-banner">{{ error() }}</div>
+}
+
+@if (loading()) {
+  <app-loading-spinner />
+} @else {
+  <div class="stats-grid">
+    <app-stat-card label="Total Applications" [value]="totalCount()" accent="blue" />
+    <app-stat-card label="Applied" [value]="appliedCount()" accent="blue" />
+    <app-stat-card label="Interviewing" [value]="interviewingCount()" accent="amber" />
+    <app-stat-card label="Rejected" [value]="rejectedCount()" accent="red" />
+    <app-stat-card label="Offers" [value]="offerCount()" accent="green" />
+  </div>
+
+  <div class="dashboard-grid">
+    <div class="card chart-card">
+      <h3>Status breakdown</h3>
+
+      @if (totalCount() === 0) {
+        <app-empty-state title="No applications yet" message="Add your first application to see your status breakdown." />
+      } @else {
+        <div class="chart-wrapper">
+          <svg viewBox="0 0 140 140" class="donut-chart">
+            <circle cx="70" cy="70" r="60" fill="none" stroke="var(--color-border)" stroke-width="20" />
+            @for (segment of chartSegments(); track segment.status) {
+              <circle
+                cx="70"
+                cy="70"
+                r="60"
+                fill="none"
+                stroke-width="20"
+                stroke-linecap="round"
+                [attr.stroke]="segment.color"
+                [attr.stroke-dasharray]="segment.dasharray"
+                [attr.stroke-dashoffset]="segment.dashoffset"
+                transform="rotate(-90 70 70)"
+              />
+            }
+            <text x="70" y="65" text-anchor="middle" class="chart-total">{{ totalCount() }}</text>
+            <text x="70" y="82" text-anchor="middle" class="chart-total-label">total</text>
+          </svg>
+
+          <ul class="chart-legend">
+            @for (segment of chartSegments(); track segment.status) {
+              <li>
+                <span class="legend-swatch" [style.background]="segment.color"></span>
+                {{ segment.status }}
+                <span class="legend-count">{{ segment.count }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+
+    <div class="card">
+      <h3>Recent applications</h3>
+      @if (recentApplications().length === 0) {
+        <app-empty-state title="No applications yet" />
+      } @else {
+        <ul class="mini-list">
+          @for (application of recentApplications(); track application.id) {
+            <li>
+              <div>
+                <strong>{{ application.roleTitle }}</strong>
+                <span class="mini-list-sub">{{ application.companyName }} · {{ application.appliedDate | timeAgo }}</span>
+              </div>
+              <app-status-badge [status]="application.status" />
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    <div class="card">
+      <h3>Upcoming interviews</h3>
+      @if (upcomingInterviews().length === 0) {
+        <app-empty-state title="No upcoming interviews" message="Scheduled interviews will show up here." />
+      } @else {
+        <ul class="mini-list">
+          @for (interview of upcomingInterviews(); track interview.id) {
+            <li>
+              <div>
+                <strong>{{ interview.round }}</strong>
+                <span class="mini-list-sub">{{ interview.roleTitle }} · {{ interview.companyName }}</span>
+              </div>
+              <span class="mini-list-when">{{ interview.scheduledAt | timeAgo }}</span>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  </div>
+}
