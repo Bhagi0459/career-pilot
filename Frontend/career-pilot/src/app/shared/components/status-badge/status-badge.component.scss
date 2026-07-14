@@ -11,5 +11,5 @@
   &.amber { background: var(--color-warning-bg); color: var(--color-warning); }
   &.green { background: var(--color-success-bg); color: var(--color-success); }
   &.red { background: var(--color-danger-bg); color: var(--color-danger); }
-  &.neutral { background: #e5e7eb; color: #374151; }
+  &.neutral { background: var(--color-neutral-bg); color: var(--color-neutral); }
 }

@@ -1,5 +1,8 @@
 <div class="page-header">
-  <h2>Interviews</h2>
+  <div>
+    <h2>Interviews</h2>
+    <p class="page-subtitle">Every scheduled and past interview across your applications.</p>
+  </div>
   <a routerLink="/interviews/new" class="btn btn-primary">+ Add Interview</a>
 </div>
 
@@ -28,10 +31,10 @@
       <tbody>
         @for (interview of interviews(); track interview.id) {
           <tr>
-            <td>{{ interview.round }}</td>
-            <td>{{ interview.roleTitle }} · {{ interview.companyName }}</td>
-            <td>{{ interview.scheduledAt | timeAgo }}</td>
-            <td><app-status-badge [status]="interview.status" /></td>
+            <td data-label="Round">{{ interview.round }}</td>
+            <td data-label="Application">{{ interview.roleTitle }} · {{ interview.companyName }}</td>
+            <td data-label="Scheduled">{{ interview.scheduledAt | timeAgo }}</td>
+            <td data-label="Status"><app-status-badge [status]="interview.status" /></td>
             <td class="table-actions">
               <a [routerLink]="['/interviews', interview.id, 'edit']" class="icon-btn">Edit</a>
               <button type="button" class="icon-btn" (click)="confirmDelete(interview)">Delete</button>

@@ -3,6 +3,10 @@
     <div class="auth-logo">CareerPilot</div>
     <p class="auth-subtitle">Sign in to keep tracking your job search.</p>
 
+    @if (passwordChanged()) {
+      <div class="success-banner">Your password was changed. Sign in with your new password.</div>
+    }
+
     @if (errorMessage()) {
       <div class="error-banner">{{ errorMessage() }}</div>
     }
@@ -22,6 +26,7 @@
         @if (form.controls.password.invalid && form.controls.password.touched) {
           <span class="field-error">Password is required.</span>
         }
+        <a routerLink="/forgot-password" class="forgot-password-link">Forgot password?</a>
       </div>
 
       <div class="form-actions">

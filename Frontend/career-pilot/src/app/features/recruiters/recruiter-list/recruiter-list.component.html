@@ -1,5 +1,8 @@
 <div class="page-header">
-  <h2>Recruiters</h2>
+  <div>
+    <h2>Recruiters</h2>
+    <p class="page-subtitle">Your contacts at each company, and how to reach them.</p>
+  </div>
   <a routerLink="/recruiters/new" class="btn btn-primary">+ Add Recruiter</a>
 </div>
 
@@ -28,10 +31,10 @@
       <tbody>
         @for (recruiter of recruiters(); track recruiter.id) {
           <tr>
-            <td>{{ recruiter.name }}</td>
-            <td>{{ recruiter.companyName }}</td>
-            <td>{{ recruiter.email || '—' }}</td>
-            <td>
+            <td data-label="Name">{{ recruiter.name }}</td>
+            <td data-label="Company">{{ recruiter.companyName }}</td>
+            <td data-label="Email">{{ recruiter.email || '—' }}</td>
+            <td data-label="LinkedIn">
               @if (recruiter.linkedInUrl) {
                 <a [href]="recruiter.linkedInUrl" target="_blank" rel="noopener">Profile</a>
               } @else {

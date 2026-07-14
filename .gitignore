@@ -6,3 +6,5 @@
 
 # Never commit local secret overrides
 Backend/**/appsettings.Local.json
+Backend/**/appsettings.Production.json
+Backend/**/appsettings.*.local.json

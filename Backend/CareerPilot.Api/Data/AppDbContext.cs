@@ -10,12 +10,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Recruiter> Recruiters => Set<Recruiter>();
     public DbSet<JobApplication> JobApplications => Set<JobApplication>();
     public DbSet<Interview> Interviews => Set<Interview>();
+    public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasIndex(u => u.Email).IsUnique();
+            entity.Property(u => u.DisplayName).HasMaxLength(100).IsRequired();
         });
 
         modelBuilder.Entity<Company>(entity =>
@@ -62,6 +64,17 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasOne(i => i.JobApplication)
                 .WithMany(a => a.Interviews)
                 .HasForeignKey(i => i.JobApplicationId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<PasswordResetToken>(entity =>
+        {
+            entity.HasIndex(t => t.TokenHash).IsUnique();
+            entity.Property(t => t.TokenHash).HasMaxLength(128).IsRequired();
+
+            entity.HasOne(t => t.User)
+                .WithMany(u => u.PasswordResetTokens)
+                .HasForeignKey(t => t.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }

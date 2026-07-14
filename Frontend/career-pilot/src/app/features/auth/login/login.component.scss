@@ -1,1 +1,9 @@
 /* Layout comes from shared .auth-page / .auth-card utility classes in styles.scss */
+
+.forgot-password-link {
+  display: inline-block;
+  margin-top: var(--space-xs);
+  font-size: 13px;
+  color: var(--color-accent);
+  font-weight: 600;
+}

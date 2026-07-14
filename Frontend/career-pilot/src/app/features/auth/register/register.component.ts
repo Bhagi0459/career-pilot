@@ -23,6 +23,7 @@ export class RegisterComponent {
 
   readonly form = this.fb.nonNullable.group(
     {
+      displayName: ['', [Validators.required, Validators.maxLength(100)]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]]
@@ -39,9 +40,9 @@ export class RegisterComponent {
     this.loading.set(true);
     this.errorMessage.set(null);
 
-    const { email, password } = this.form.getRawValue();
+    const { displayName, email, password } = this.form.getRawValue();
 
-    this.authService.register({ email, password }).subscribe({
+    this.authService.register({ displayName, email, password }).subscribe({
       next: () => {
         this.loading.set(false);
         void this.router.navigateByUrl('/dashboard');

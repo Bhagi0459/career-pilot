@@ -1,0 +1,98 @@
+<div class="page-header">
+  <div>
+    <h2>Settings</h2>
+    <p class="page-subtitle">Manage your account details and security.</p>
+  </div>
+</div>
+
+<div class="settings-grid">
+  <section class="card settings-section">
+    <h3>Profile</h3>
+
+    @if (profileLoading()) {
+      <app-loading-spinner />
+    } @else if (profileLoadError()) {
+      <div class="error-banner">{{ profileLoadError() }}</div>
+    } @else {
+      <div class="settings-meta">
+        <div class="meta-item">
+          <span class="meta-label">Email</span>
+          <span class="meta-value">{{ profile()?.email }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Member since</span>
+          <span class="meta-value">{{ profile()?.createdAt | date: 'mediumDate' }}</span>
+        </div>
+      </div>
+
+      @if (profileError()) {
+        <div class="error-banner">{{ profileError() }}</div>
+      }
+      @if (profileSuccess()) {
+        <div class="success-banner">Profile updated.</div>
+      }
+
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+        <div class="form-field">
+          <label for="displayName">Display name</label>
+          <input id="displayName" type="text" formControlName="displayName" autocomplete="name" maxlength="100" />
+          @if (profileForm.controls.displayName.invalid && profileForm.controls.displayName.touched) {
+            <span class="field-error">Enter a display name (up to 100 characters).</span>
+          }
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="profileSaving()">
+            {{ profileSaving() ? 'Saving…' : 'Save changes' }}
+          </button>
+        </div>
+      </form>
+    }
+  </section>
+
+  <section class="card settings-section">
+    <h3>Change password</h3>
+    <p class="section-hint">You'll be signed out and asked to sign in again after changing your password.</p>
+
+    @if (passwordError()) {
+      <div class="error-banner">{{ passwordError() }}</div>
+    }
+
+    <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+      <div class="form-field">
+        <label for="currentPassword">Current password</label>
+        <input
+          id="currentPassword"
+          type="password"
+          formControlName="currentPassword"
+          autocomplete="current-password"
+        />
+        @if (passwordForm.controls.currentPassword.invalid && passwordForm.controls.currentPassword.touched) {
+          <span class="field-error">Enter your current password.</span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="newPassword">New password</label>
+        <input id="newPassword" type="password" formControlName="newPassword" autocomplete="new-password" />
+        @if (passwordForm.controls.newPassword.invalid && passwordForm.controls.newPassword.touched) {
+          <span class="field-error">Password must be at least 8 characters.</span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="confirmPassword">Confirm new password</label>
+        <input id="confirmPassword" type="password" formControlName="confirmPassword" autocomplete="new-password" />
+        @if (passwordForm.errors?.['passwordsMismatch'] && passwordForm.controls.confirmPassword.touched) {
+          <span class="field-error">Passwords do not match.</span>
+        }
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="passwordSaving()">
+          {{ passwordSaving() ? 'Updating…' : 'Change password' }}
+        </button>
+      </div>
+    </form>
+  </section>
+</div>

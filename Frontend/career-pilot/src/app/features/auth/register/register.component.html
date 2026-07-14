@@ -9,8 +9,16 @@
 
     <form [formGroup]="form" (ngSubmit)="submit()">
       <div class="form-field">
+        <label for="displayName">Display name</label>
+        <input id="displayName" type="text" formControlName="displayName" appAutofocus autocomplete="name" maxlength="100" />
+        @if (form.controls.displayName.invalid && form.controls.displayName.touched) {
+          <span class="field-error">Enter a display name.</span>
+        }
+      </div>
+
+      <div class="form-field">
         <label for="email">Email</label>
-        <input id="email" type="email" formControlName="email" appAutofocus autocomplete="email" />
+        <input id="email" type="email" formControlName="email" autocomplete="email" />
         @if (form.controls.email.invalid && form.controls.email.touched) {
           <span class="field-error">Enter a valid email address.</span>
         }

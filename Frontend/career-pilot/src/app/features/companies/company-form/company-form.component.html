@@ -6,7 +6,7 @@
   <div class="error-banner">{{ errorMessage() }}</div>
 }
 
-<form [formGroup]="form" (ngSubmit)="submit()" class="card">
+<form [formGroup]="form" (ngSubmit)="submit()" class="card form-card">
   <div class="form-field">
     <label for="name">Company name</label>
     <input id="name" formControlName="name" appAutofocus />

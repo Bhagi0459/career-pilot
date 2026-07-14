@@ -1,5 +1,8 @@
 <div class="page-header">
-  <h2>Applications</h2>
+  <div>
+    <h2>Applications</h2>
+    <p class="page-subtitle">Search, filter, and track every role you've applied to.</p>
+  </div>
   <a routerLink="/applications/new" class="btn btn-primary">+ Add Application</a>
 </div>
 
@@ -68,11 +71,11 @@
       <tbody>
         @for (application of result().items; track application.id) {
           <tr>
-            <td>{{ application.roleTitle }}</td>
-            <td>{{ application.companyName }}</td>
-            <td><app-status-badge [status]="application.status" /></td>
-            <td>{{ application.country || '—' }}</td>
-            <td>{{ application.appliedDate | timeAgo }}</td>
+            <td data-label="Role">{{ application.roleTitle }}</td>
+            <td data-label="Company">{{ application.companyName }}</td>
+            <td data-label="Status"><app-status-badge [status]="application.status" /></td>
+            <td data-label="Country">{{ application.country || '—' }}</td>
+            <td data-label="Applied">{{ application.appliedDate | timeAgo }}</td>
             <td class="table-actions">
               <a [routerLink]="['/applications', application.id, 'edit']" class="icon-btn">Edit</a>
               <button type="button" class="icon-btn" (click)="confirmDelete(application)">Delete</button>

@@ -37,6 +37,9 @@ yarn-error.log
 testem.log
 /typings
 
+# Vercel CLI project linkage (only created if `vercel` CLI is run locally)
+.vercel
+
 # System files
 .DS_Store
 Thumbs.db

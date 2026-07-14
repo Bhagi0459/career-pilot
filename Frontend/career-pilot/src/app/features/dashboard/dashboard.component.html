@@ -1,5 +1,8 @@
 <div class="page-header">
-  <h2>Dashboard</h2>
+  <div>
+    <h2>Dashboard</h2>
+    <p class="page-subtitle">A snapshot of your job search — applications, pipeline, and what's coming up.</p>
+  </div>
   <a routerLink="/applications/new" class="btn btn-primary">+ Add Application</a>
 </div>
 
@@ -11,7 +14,7 @@
   <app-loading-spinner />
 } @else {
   <div class="stats-grid">
-    <app-stat-card label="Total Applications" [value]="totalCount()" accent="blue" />
+    <app-stat-card label="Total Applications" [value]="totalCount()" accent="purple" />
     <app-stat-card label="Applied" [value]="appliedCount()" accent="blue" />
     <app-stat-card label="Interviewing" [value]="interviewingCount()" accent="amber" />
     <app-stat-card label="Rejected" [value]="rejectedCount()" accent="red" />
@@ -27,30 +30,31 @@
       } @else {
         <div class="chart-wrapper">
           <svg viewBox="0 0 140 140" class="donut-chart">
-            <circle cx="70" cy="70" r="60" fill="none" stroke="var(--color-border)" stroke-width="20" />
+            <circle cx="70" cy="70" r="58" fill="none" stroke="var(--color-border)" stroke-width="16" />
             @for (segment of chartSegments(); track segment.status) {
               <circle
                 cx="70"
                 cy="70"
-                r="60"
+                r="58"
                 fill="none"
-                stroke-width="20"
+                stroke-width="16"
                 stroke-linecap="round"
                 [attr.stroke]="segment.color"
                 [attr.stroke-dasharray]="segment.dasharray"
                 [attr.stroke-dashoffset]="segment.dashoffset"
                 transform="rotate(-90 70 70)"
+                class="donut-segment"
               />
             }
-            <text x="70" y="65" text-anchor="middle" class="chart-total">{{ totalCount() }}</text>
-            <text x="70" y="82" text-anchor="middle" class="chart-total-label">total</text>
+            <text x="70" y="66" text-anchor="middle" class="chart-total">{{ totalCount() }}</text>
+            <text x="70" y="84" text-anchor="middle" class="chart-total-label">applications</text>
           </svg>
 
           <ul class="chart-legend">
             @for (segment of chartSegments(); track segment.status) {
               <li>
                 <span class="legend-swatch" [style.background]="segment.color"></span>
-                {{ segment.status }}
+                <span class="legend-label">{{ segment.status }}</span>
                 <span class="legend-count">{{ segment.count }}</span>
               </li>
             }
@@ -60,14 +64,17 @@
     </div>
 
     <div class="card">
-      <h3>Recent applications</h3>
+      <div class="card-heading">
+        <h3>Recent applications</h3>
+        <a routerLink="/applications" class="card-heading-link">View all</a>
+      </div>
       @if (recentApplications().length === 0) {
         <app-empty-state title="No applications yet" />
       } @else {
         <ul class="mini-list">
           @for (application of recentApplications(); track application.id) {
             <li>
-              <div>
+              <div class="mini-list-main">
                 <strong>{{ application.roleTitle }}</strong>
                 <span class="mini-list-sub">{{ application.companyName }} · {{ application.appliedDate | timeAgo }}</span>
               </div>
@@ -79,14 +86,17 @@
     </div>
 
     <div class="card">
-      <h3>Upcoming interviews</h3>
+      <div class="card-heading">
+        <h3>Upcoming interviews</h3>
+        <a routerLink="/interviews" class="card-heading-link">View all</a>
+      </div>
       @if (upcomingInterviews().length === 0) {
         <app-empty-state title="No upcoming interviews" message="Scheduled interviews will show up here." />
       } @else {
         <ul class="mini-list">
           @for (interview of upcomingInterviews(); track interview.id) {
             <li>
-              <div>
+              <div class="mini-list-main">
                 <strong>{{ interview.round }}</strong>
                 <span class="mini-list-sub">{{ interview.roleTitle }} · {{ interview.companyName }}</span>
               </div>

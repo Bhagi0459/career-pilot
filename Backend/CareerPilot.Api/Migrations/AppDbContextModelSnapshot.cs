@@ -128,6 +128,41 @@ namespace CareerPilot.Api.Migrations
                     b.ToTable("JobApplications");
                 });
 
+            modelBuilder.Entity("CareerPilot.Api.Models.PasswordResetToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PasswordResetTokens");
+                });
+
             modelBuilder.Entity("CareerPilot.Api.Models.Recruiter", b =>
                 {
                     b.Property<int>("Id")
@@ -171,6 +206,11 @@ namespace CareerPilot.Api.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -236,6 +276,17 @@ namespace CareerPilot.Api.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("CareerPilot.Api.Models.PasswordResetToken", b =>
+                {
+                    b.HasOne("CareerPilot.Api.Models.User", "User")
+                        .WithMany("PasswordResetTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("CareerPilot.Api.Models.Recruiter", b =>
                 {
                     b.HasOne("CareerPilot.Api.Models.Company", "Company")
@@ -277,6 +328,8 @@ namespace CareerPilot.Api.Migrations
                     b.Navigation("Companies");
 
                     b.Navigation("JobApplications");
+
+                    b.Navigation("PasswordResetTokens");
 
                     b.Navigation("Recruiters");
                 });
