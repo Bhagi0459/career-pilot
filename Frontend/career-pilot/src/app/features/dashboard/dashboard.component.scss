@@ -33,14 +33,19 @@
   }
 }
 
+// A bare-text action link (no background/border like .btn), so unlike the nav/button fixes above,
+// the underline is reintroduced on hover to keep a clear interactive cue once the static one is
+// removed - color change alone is a weaker affordance for a plain text link like this.
 .card-heading-link {
   font-size: 13px;
   font-weight: 600;
   color: var(--color-accent);
   white-space: nowrap;
+  text-decoration: none;
 
   &:hover {
     color: var(--color-accent-hover);
+    text-decoration: underline;
   }
 }
 

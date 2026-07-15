@@ -99,6 +99,11 @@ nav ul {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+// Sidebar nav links are icon+label controls, not inline text, so the browser-default underline
+// under the label reads as a rendering glitch rather than a link affordance. The background fill
+// on hover/active plus the focus-visible outline below already make the interactive state clear
+// without it. This same markup drives the mobile nav (it's the same <nav>, just slid in via
+// .sidebar.open), so the fix applies to both.
 nav a {
   display: flex;
   align-items: center;
@@ -109,6 +114,7 @@ nav a {
   font-weight: 500;
   color: var(--color-sidebar-text);
   white-space: nowrap;
+  text-decoration: none;
   transition: background-color 0.15s ease, color 0.15s ease;
 
   svg {

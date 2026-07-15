@@ -110,6 +110,12 @@ a {
   max-width: 720px;
 }
 
+// `.btn` is used on both <button> and <a routerLink> elements (e.g. "+ Add Application",
+// "Cancel"). Buttons never have an underline, but anchors do by default, and `color: inherit` on
+// the global `a` selector above doesn't reset text-decoration - so without this, every button-
+// styled link picks up a stray underline under its label. Hover/focus affordance for these comes
+// from the background-color and border changes below plus the global :focus-visible outline, so
+// removing the underline doesn't lose any interactive cue.
 .btn {
   display: inline-flex;
   align-items: center;
@@ -120,6 +126,7 @@ a {
   border: 1px solid transparent;
   font-size: 14px;
   font-weight: 600;
+  text-decoration: none;
   cursor: pointer;
   transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
 
@@ -366,12 +373,15 @@ table.data-table {
   justify-content: flex-end;
 }
 
+// Same reasoning as .btn above - .icon-btn is used on the per-row "Edit" <a> links, which need
+// the underline stripped since they're styled as controls, not inline text.
 .icon-btn {
   background: transparent;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   padding: 6px 10px;
   font-size: 13px;
+  text-decoration: none;
   cursor: pointer;
   color: var(--color-text);
 
