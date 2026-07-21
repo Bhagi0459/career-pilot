@@ -6,14 +6,41 @@
   <a routerLink="/interviews/new" class="btn btn-primary">+ Add Interview</a>
 </div>
 
+<div class="card filters-bar">
+  <div class="form-field">
+    <label for="search">Search</label>
+    <input id="search" [formControl]="searchControl" placeholder="Round, role, or company…" />
+  </div>
+
+  <div class="form-field">
+    <label for="status">Status</label>
+    <select id="status" (change)="onStatusChange($any($event.target).value)">
+      <option value="" [selected]="statusFilter() === ''">All statuses</option>
+      @for (status of statuses; track status) {
+        <option [value]="status" [selected]="statusFilter() === status">{{ status }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="form-field">
+    <label for="sort">Sort by</label>
+    <select id="sort" (change)="onSortChange($any($event.target).value)">
+      <option value="scheduledAt_asc" [selected]="sort() === 'scheduledAt_asc'">Scheduled (soonest)</option>
+      <option value="scheduledAt_desc" [selected]="sort() === 'scheduledAt_desc'">Scheduled (latest)</option>
+      <option value="round_asc" [selected]="sort() === 'round_asc'">Round (A–Z)</option>
+      <option value="round_desc" [selected]="sort() === 'round_desc'">Round (Z–A)</option>
+    </select>
+  </div>
+</div>
+
 @if (error()) {
   <div class="error-banner">{{ error() }}</div>
 }
 
 @if (loading()) {
   <app-loading-spinner />
-} @else if (interviews().length === 0) {
-  <app-empty-state title="No interviews scheduled" message="Add an interview and link it to one of your applications.">
+} @else if (result().items.length === 0) {
+  <app-empty-state title="No interviews found" message="Try adjusting your filters, or add an interview linked to one of your applications.">
     <a routerLink="/interviews/new" class="btn btn-primary">+ Add Interview</a>
   </app-empty-state>
 } @else {
@@ -29,7 +56,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (interview of interviews(); track interview.id) {
+        @for (interview of result().items; track interview.id) {
           <tr>
             <td data-label="Round">{{ interview.round }}</td>
             <td data-label="Application">{{ interview.roleTitle }} · {{ interview.companyName }}</td>
@@ -44,6 +71,16 @@
       </tbody>
     </table>
   </div>
+
+  @if (totalPages() > 1) {
+    <div class="pagination">
+      <button type="button" class="icon-btn" [disabled]="page() === 1" (click)="goToPage(page() - 1)">Previous</button>
+      <span>Page {{ page() }} of {{ totalPages() }}</span>
+      <button type="button" class="icon-btn" [disabled]="page() === totalPages()" (click)="goToPage(page() + 1)">
+        Next
+      </button>
+    </div>
+  }
 }
 
 @if (pendingDelete(); as interview) {

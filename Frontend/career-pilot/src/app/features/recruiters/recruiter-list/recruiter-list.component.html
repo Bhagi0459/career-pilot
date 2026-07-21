@@ -6,14 +6,41 @@
   <a routerLink="/recruiters/new" class="btn btn-primary">+ Add Recruiter</a>
 </div>
 
+<div class="card filters-bar">
+  <div class="form-field">
+    <label for="search">Search</label>
+    <input id="search" [formControl]="searchControl" placeholder="Name, email, or company…" />
+  </div>
+
+  <div class="form-field">
+    <label for="company">Company</label>
+    <select id="company" (change)="onCompanyChange($any($event.target).value)">
+      <option value="" [selected]="companyFilter() === ''">All companies</option>
+      @for (company of companies(); track company.id) {
+        <option [value]="company.id" [selected]="companyFilter() === company.id">{{ company.name }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="form-field">
+    <label for="sort">Sort by</label>
+    <select id="sort" (change)="onSortChange($any($event.target).value)">
+      <option value="name_asc" [selected]="sort() === 'name_asc'">Name (A–Z)</option>
+      <option value="name_desc" [selected]="sort() === 'name_desc'">Name (Z–A)</option>
+      <option value="company_asc" [selected]="sort() === 'company_asc'">Company (A–Z)</option>
+      <option value="company_desc" [selected]="sort() === 'company_desc'">Company (Z–A)</option>
+    </select>
+  </div>
+</div>
+
 @if (error()) {
   <div class="error-banner">{{ error() }}</div>
 }
 
 @if (loading()) {
   <app-loading-spinner />
-} @else if (recruiters().length === 0) {
-  <app-empty-state title="No recruiters yet" message="Add a recruiter and link them to a company to keep track of your contacts.">
+} @else if (result().items.length === 0) {
+  <app-empty-state title="No recruiters found" message="Try adjusting your filters, or add your first recruiter.">
     <a routerLink="/recruiters/new" class="btn btn-primary">+ Add Recruiter</a>
   </app-empty-state>
 } @else {
@@ -29,7 +56,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (recruiter of recruiters(); track recruiter.id) {
+        @for (recruiter of result().items; track recruiter.id) {
           <tr>
             <td data-label="Name">{{ recruiter.name }}</td>
             <td data-label="Company">{{ recruiter.companyName }}</td>
@@ -50,6 +77,16 @@
       </tbody>
     </table>
   </div>
+
+  @if (totalPages() > 1) {
+    <div class="pagination">
+      <button type="button" class="icon-btn" [disabled]="page() === 1" (click)="goToPage(page() - 1)">Previous</button>
+      <span>Page {{ page() }} of {{ totalPages() }}</span>
+      <button type="button" class="icon-btn" [disabled]="page() === totalPages()" (click)="goToPage(page() + 1)">
+        Next
+      </button>
+    </div>
+  }
 }
 
 @if (pendingDelete(); as recruiter) {

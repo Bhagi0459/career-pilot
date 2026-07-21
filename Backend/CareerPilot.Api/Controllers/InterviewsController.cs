@@ -2,6 +2,7 @@ using CareerPilot.Api.Common;
 using CareerPilot.Api.Data;
 using CareerPilot.Api.Dtos;
 using CareerPilot.Api.Models;
+using CareerPilot.Api.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +15,64 @@ namespace CareerPilot.Api.Controllers;
 public class InterviewsController(AppDbContext db) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<InterviewDto>>> GetAll([FromQuery] int? applicationId)
+    public async Task<ActionResult<PagedResult<InterviewDto>>> GetAll(
+        [FromQuery] string? search,
+        [FromQuery] InterviewStatus? status,
+        [FromQuery] int? applicationId,
+        [FromQuery] string? sort,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        var userId = User.GetUserId();
+        page = page < 1 ? 1 : page;
+        pageSize = pageSize is < 1 or > 100 ? 20 : pageSize;
+
+        var query = db.Interviews.Where(i => i.JobApplication!.UserId == userId);
+
+        if (applicationId.HasValue)
+        {
+            query = query.Where(i => i.JobApplicationId == applicationId.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            query = query.Where(i =>
+                EF.Functions.ILike(i.Round, $"%{term}%") ||
+                EF.Functions.ILike(i.JobApplication!.RoleTitle, $"%{term}%") ||
+                EF.Functions.ILike(i.JobApplication.Company!.Name, $"%{term}%"));
+        }
+
+        if (status.HasValue)
+        {
+            query = query.Where(i => i.Status == status.Value);
+        }
+
+        query = sort switch
+        {
+            "scheduledAt_desc" => query.OrderByDescending(i => i.ScheduledAt),
+            "round_asc" => query.OrderBy(i => i.Round),
+            "round_desc" => query.OrderByDescending(i => i.Round),
+            _ => query.OrderBy(i => i.ScheduledAt)
+        };
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(i => new InterviewDto(
+                i.Id, i.JobApplicationId, i.Round, i.ScheduledAt, i.Status, i.Notes,
+                i.JobApplication!.RoleTitle, i.JobApplication.Company!.Name))
+            .ToListAsync();
+
+        return Ok(new PagedResult<InterviewDto>(items, totalCount, page, pageSize));
+    }
+
+    // Returns the full (unpaginated) interview set for the current user. Used by the
+    // dashboard's "upcoming interviews" list.
+    [HttpGet("all")]
+    public async Task<ActionResult<IReadOnlyList<InterviewDto>>> GetAllUnpaged([FromQuery] int? applicationId)
     {
         var userId = User.GetUserId();
         var query = db.Interviews.Where(i => i.JobApplication!.UserId == userId);

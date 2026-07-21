@@ -14,7 +14,56 @@ namespace CareerPilot.Api.Controllers;
 public class RecruitersController(AppDbContext db) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<RecruiterDto>>> GetAll([FromQuery] int? companyId)
+    public async Task<ActionResult<PagedResult<RecruiterDto>>> GetAll(
+        [FromQuery] string? search,
+        [FromQuery] int? companyId,
+        [FromQuery] string? sort,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        var userId = User.GetUserId();
+        page = page < 1 ? 1 : page;
+        pageSize = pageSize is < 1 or > 100 ? 20 : pageSize;
+
+        var query = db.Recruiters.Where(r => r.UserId == userId);
+
+        if (companyId.HasValue)
+        {
+            query = query.Where(r => r.CompanyId == companyId.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            query = query.Where(r =>
+                EF.Functions.ILike(r.Name, $"%{term}%") ||
+                (r.Email != null && EF.Functions.ILike(r.Email, $"%{term}%")) ||
+                EF.Functions.ILike(r.Company!.Name, $"%{term}%"));
+        }
+
+        query = sort switch
+        {
+            "name_desc" => query.OrderByDescending(r => r.Name),
+            "company_asc" => query.OrderBy(r => r.Company!.Name),
+            "company_desc" => query.OrderByDescending(r => r.Company!.Name),
+            _ => query.OrderBy(r => r.Name)
+        };
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(r => new RecruiterDto(r.Id, r.Name, r.Email, r.LinkedInUrl, r.CompanyId, r.Company!.Name))
+            .ToListAsync();
+
+        return Ok(new PagedResult<RecruiterDto>(items, totalCount, page, pageSize));
+    }
+
+    // Returns the full (unpaginated) recruiter set for the current user. Used by the
+    // application form's recruiter dropdown, which filters client-side by company.
+    [HttpGet("all")]
+    public async Task<ActionResult<IReadOnlyList<RecruiterDto>>> GetAllUnpaged([FromQuery] int? companyId)
     {
         var userId = User.GetUserId();
         var query = db.Recruiters.Where(r => r.UserId == userId);

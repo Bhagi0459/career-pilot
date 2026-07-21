@@ -1,14 +1,24 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Recruiter, RecruiterUpsertRequest } from '../../shared/models';
+import { PagedResult, Recruiter, RecruiterUpsertRequest } from '../../shared/models';
+
+export interface RecruiterSearchParams {
+  page: number;
+  pageSize: number;
+  sort: string;
+  search?: string;
+  companyId?: number;
+}
 
 @Injectable({ providedIn: 'root' })
 export class RecruitersService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/recruiters`;
 
+  // Full, unfiltered dataset for the current user. Powers the recruiter dropdown on the
+  // application form, filtered client-side by company. See RecruitersController.GetAllUnpaged.
   private readonly recruitersSignal = signal<Recruiter[]>([]);
   private readonly loadingSignal = signal(false);
   private readonly errorSignal = signal<string | null>(null);
@@ -21,7 +31,7 @@ export class RecruitersService {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
-    this.http.get<Recruiter[]>(this.baseUrl).subscribe({
+    this.http.get<Recruiter[]>(`${this.baseUrl}/all`).subscribe({
       next: (recruiters) => {
         this.recruitersSignal.set(recruiters);
         this.loadingSignal.set(false);
@@ -31,6 +41,15 @@ export class RecruitersService {
         this.loadingSignal.set(false);
       }
     });
+  }
+
+  search(params: RecruiterSearchParams): Observable<PagedResult<Recruiter>> {
+    let httpParams = new HttpParams().set('page', params.page).set('pageSize', params.pageSize).set('sort', params.sort);
+
+    if (params.search) httpParams = httpParams.set('search', params.search);
+    if (params.companyId) httpParams = httpParams.set('companyId', params.companyId);
+
+    return this.http.get<PagedResult<Recruiter>>(this.baseUrl, { params: httpParams });
   }
 
   getById(id: number): Observable<Recruiter> {

@@ -1,14 +1,23 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Company, CompanyUpsertRequest } from '../../shared/models';
+import { Company, CompanyUpsertRequest, PagedResult } from '../../shared/models';
+
+export interface CompanySearchParams {
+  page: number;
+  pageSize: number;
+  sort: string;
+  search?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class CompaniesService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/companies`;
 
+  // Full, unfiltered dataset for the current user. Powers the company dropdown on the
+  // application and recruiter forms. Acceptable at MVP scale - see CompaniesController.GetAllUnpaged.
   private readonly companiesSignal = signal<Company[]>([]);
   private readonly loadingSignal = signal(false);
   private readonly errorSignal = signal<string | null>(null);
@@ -21,7 +30,7 @@ export class CompaniesService {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
-    this.http.get<Company[]>(this.baseUrl).subscribe({
+    this.http.get<Company[]>(`${this.baseUrl}/all`).subscribe({
       next: (companies) => {
         this.companiesSignal.set(companies);
         this.loadingSignal.set(false);
@@ -31,6 +40,14 @@ export class CompaniesService {
         this.loadingSignal.set(false);
       }
     });
+  }
+
+  search(params: CompanySearchParams): Observable<PagedResult<Company>> {
+    let httpParams = new HttpParams().set('page', params.page).set('pageSize', params.pageSize).set('sort', params.sort);
+
+    if (params.search) httpParams = httpParams.set('search', params.search);
+
+    return this.http.get<PagedResult<Company>>(this.baseUrl, { params: httpParams });
   }
 
   getById(id: number): Observable<Company> {

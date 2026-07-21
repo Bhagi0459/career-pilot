@@ -1,8 +1,16 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Interview, InterviewUpsertRequest } from '../../shared/models';
+import { Interview, InterviewStatus, InterviewUpsertRequest, PagedResult } from '../../shared/models';
+
+export interface InterviewSearchParams {
+  page: number;
+  pageSize: number;
+  sort: string;
+  search?: string;
+  status?: InterviewStatus | '';
+}
 
 @Injectable({ providedIn: 'root' })
 export class InterviewsService {
@@ -23,7 +31,7 @@ export class InterviewsService {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
-    this.http.get<Interview[]>(this.baseUrl).subscribe({
+    this.http.get<Interview[]>(`${this.baseUrl}/all`).subscribe({
       next: (interviews) => {
         this.interviewsSignal.set(interviews);
         this.loadingSignal.set(false);
@@ -33,6 +41,15 @@ export class InterviewsService {
         this.loadingSignal.set(false);
       }
     });
+  }
+
+  search(params: InterviewSearchParams): Observable<PagedResult<Interview>> {
+    let httpParams = new HttpParams().set('page', params.page).set('pageSize', params.pageSize).set('sort', params.sort);
+
+    if (params.search) httpParams = httpParams.set('search', params.search);
+    if (params.status) httpParams = httpParams.set('status', params.status);
+
+    return this.http.get<PagedResult<Interview>>(this.baseUrl, { params: httpParams });
   }
 
   getById(id: number): Observable<Interview> {

@@ -14,7 +14,47 @@ namespace CareerPilot.Api.Controllers;
 public class CompaniesController(AppDbContext db) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<CompanyDto>>> GetAll()
+    public async Task<ActionResult<PagedResult<CompanyDto>>> GetAll(
+        [FromQuery] string? search,
+        [FromQuery] string? sort,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        var userId = User.GetUserId();
+        page = page < 1 ? 1 : page;
+        pageSize = pageSize is < 1 or > 100 ? 20 : pageSize;
+
+        var query = db.Companies.Where(c => c.UserId == userId);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            query = query.Where(c =>
+                EF.Functions.ILike(c.Name, $"%{term}%") ||
+                (c.Country != null && EF.Functions.ILike(c.Country, $"%{term}%")));
+        }
+
+        query = sort switch
+        {
+            "name_desc" => query.OrderByDescending(c => c.Name),
+            _ => query.OrderBy(c => c.Name)
+        };
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(c => ToDto(c))
+            .ToListAsync();
+
+        return Ok(new PagedResult<CompanyDto>(items, totalCount, page, pageSize));
+    }
+
+    // Returns the full (unpaginated) company set for the current user. Used by dropdowns
+    // (application form, recruiter form) that need every company, not just one page.
+    [HttpGet("all")]
+    public async Task<ActionResult<IReadOnlyList<CompanyDto>>> GetAllUnpaged()
     {
         var userId = User.GetUserId();
         var companies = await db.Companies
