@@ -39,15 +39,22 @@ var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "CareerPilot.Client";
 
 builder.Services.AddSingleton<ITokenService, TokenService>();
 
+var gmailConfigured = !string.IsNullOrEmpty(builder.Configuration["Email:GmailAddress"])
+    && !string.IsNullOrEmpty(builder.Configuration["Email:AppPassword"]);
+
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddScoped<IPasswordResetEmailSender, DevLoggingPasswordResetEmailSender>();
 }
+else if (gmailConfigured)
+{
+    builder.Services.AddScoped<IPasswordResetEmailSender, GmailSmtpPasswordResetEmailSender>();
+}
 else
 {
-    // No real email provider is wired up yet - see Program.cs comment on
-    // UnconfiguredPasswordResetEmailSender / the CORS+forgot-password writeup for what's needed
-    // to turn this into a real send in production.
+    // Email:GmailAddress / Email:AppPassword aren't set (e.g. Email__GmailAddress /
+    // Email__AppPassword env vars missing in this deployment) - fall back to a safe no-op
+    // instead of crashing at startup.
     builder.Services.AddScoped<IPasswordResetEmailSender, UnconfiguredPasswordResetEmailSender>();
 }
 
