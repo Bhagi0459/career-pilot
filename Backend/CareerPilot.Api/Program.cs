@@ -39,22 +39,23 @@ var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "CareerPilot.Client";
 
 builder.Services.AddSingleton<ITokenService, TokenService>();
 
-var gmailConfigured = !string.IsNullOrEmpty(builder.Configuration["Email:GmailAddress"])
-    && !string.IsNullOrEmpty(builder.Configuration["Email:AppPassword"]);
+var smtpConfigured = !string.IsNullOrEmpty(builder.Configuration["Email:Host"])
+    && !string.IsNullOrEmpty(builder.Configuration["Email:Username"])
+    && !string.IsNullOrEmpty(builder.Configuration["Email:Password"]);
 
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddScoped<IPasswordResetEmailSender, DevLoggingPasswordResetEmailSender>();
 }
-else if (gmailConfigured)
+else if (smtpConfigured)
 {
-    builder.Services.AddScoped<IPasswordResetEmailSender, GmailSmtpPasswordResetEmailSender>();
+    builder.Services.AddScoped<IPasswordResetEmailSender, SmtpPasswordResetEmailSender>();
 }
 else
 {
-    // Email:GmailAddress / Email:AppPassword aren't set (e.g. Email__GmailAddress /
-    // Email__AppPassword env vars missing in this deployment) - fall back to a safe no-op
-    // instead of crashing at startup.
+    // Email:Host / Email:Username / Email:Password aren't set (e.g. the corresponding
+    // Email__Host / Email__Username / Email__Password env vars are missing in this
+    // deployment) - fall back to a safe no-op instead of crashing at startup.
     builder.Services.AddScoped<IPasswordResetEmailSender, UnconfiguredPasswordResetEmailSender>();
 }
 
