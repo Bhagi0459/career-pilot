@@ -54,7 +54,7 @@ public class RecruitersController(AppDbContext db) : ControllerBase
         var items = await query
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(r => new RecruiterDto(r.Id, r.Name, r.Email, r.LinkedInUrl, r.CompanyId, r.Company!.Name))
+            .Select(r => new RecruiterDto(r.Id, r.Name, r.Email, r.PhoneNumber, r.LinkedInUrl, r.CompanyId, r.Company!.Name))
             .ToListAsync();
 
         return Ok(new PagedResult<RecruiterDto>(items, totalCount, page, pageSize));
@@ -75,7 +75,7 @@ public class RecruitersController(AppDbContext db) : ControllerBase
 
         var recruiters = await query
             .OrderBy(r => r.Name)
-            .Select(r => new RecruiterDto(r.Id, r.Name, r.Email, r.LinkedInUrl, r.CompanyId, r.Company!.Name))
+            .Select(r => new RecruiterDto(r.Id, r.Name, r.Email, r.PhoneNumber, r.LinkedInUrl, r.CompanyId, r.Company!.Name))
             .ToListAsync();
 
         return Ok(recruiters);
@@ -87,7 +87,7 @@ public class RecruitersController(AppDbContext db) : ControllerBase
         var userId = User.GetUserId();
         var recruiter = await db.Recruiters
             .Where(r => r.Id == id && r.UserId == userId)
-            .Select(r => new RecruiterDto(r.Id, r.Name, r.Email, r.LinkedInUrl, r.CompanyId, r.Company!.Name))
+            .Select(r => new RecruiterDto(r.Id, r.Name, r.Email, r.PhoneNumber, r.LinkedInUrl, r.CompanyId, r.Company!.Name))
             .SingleOrDefaultAsync();
 
         return recruiter is null ? NotFound() : Ok(recruiter);
@@ -106,6 +106,7 @@ public class RecruitersController(AppDbContext db) : ControllerBase
             CompanyId = request.CompanyId,
             Name = request.Name,
             Email = request.Email,
+            PhoneNumber = request.PhoneNumber,
             LinkedInUrl = request.LinkedInUrl
         };
 
@@ -113,7 +114,7 @@ public class RecruitersController(AppDbContext db) : ControllerBase
         await db.SaveChangesAsync();
         await db.Entry(recruiter).Reference(r => r.Company).LoadAsync();
 
-        var dto = new RecruiterDto(recruiter.Id, recruiter.Name, recruiter.Email, recruiter.LinkedInUrl, recruiter.CompanyId, recruiter.Company!.Name);
+        var dto = new RecruiterDto(recruiter.Id, recruiter.Name, recruiter.Email, recruiter.PhoneNumber, recruiter.LinkedInUrl, recruiter.CompanyId, recruiter.Company!.Name);
         return CreatedAtAction(nameof(GetById), new { id = recruiter.Id }, dto);
     }
 
@@ -129,13 +130,14 @@ public class RecruitersController(AppDbContext db) : ControllerBase
 
         recruiter.Name = request.Name;
         recruiter.Email = request.Email;
+        recruiter.PhoneNumber = request.PhoneNumber;
         recruiter.LinkedInUrl = request.LinkedInUrl;
         recruiter.CompanyId = request.CompanyId;
 
         await db.SaveChangesAsync();
         await db.Entry(recruiter).Reference(r => r.Company).LoadAsync();
 
-        return Ok(new RecruiterDto(recruiter.Id, recruiter.Name, recruiter.Email, recruiter.LinkedInUrl, recruiter.CompanyId, recruiter.Company!.Name));
+        return Ok(new RecruiterDto(recruiter.Id, recruiter.Name, recruiter.Email, recruiter.PhoneNumber, recruiter.LinkedInUrl, recruiter.CompanyId, recruiter.Company!.Name));
     }
 
     [HttpDelete("{id:int}")]

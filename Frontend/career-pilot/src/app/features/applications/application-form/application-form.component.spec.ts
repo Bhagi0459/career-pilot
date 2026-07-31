@@ -13,8 +13,8 @@ const COMPANIES: Company[] = [
 ];
 
 const RECRUITERS: Recruiter[] = [
-  { id: 10, name: 'Alice', email: null, linkedInUrl: null, companyId: 1, companyName: 'Acme Corp' },
-  { id: 11, name: 'Bob', email: null, linkedInUrl: null, companyId: 2, companyName: 'Globex' }
+  { id: 10, name: 'Alice', email: null, phoneNumber: null, linkedInUrl: null, companyId: 1, companyName: 'Acme Corp' },
+  { id: 11, name: 'Bob', email: null, phoneNumber: null, linkedInUrl: null, companyId: 2, companyName: 'Globex' }
 ];
 
 function selectOptionByValue(select: HTMLSelectElement, value: string): void {

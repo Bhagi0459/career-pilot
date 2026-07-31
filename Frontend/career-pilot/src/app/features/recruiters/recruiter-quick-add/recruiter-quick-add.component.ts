@@ -30,6 +30,7 @@ export class RecruiterQuickAddComponent {
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(200)]],
     email: ['', [Validators.email]],
+    phoneNumber: [''],
     linkedInUrl: ['']
   });
 
@@ -47,6 +48,7 @@ export class RecruiterQuickAddComponent {
       .create({
         name: raw.name,
         email: raw.email || null,
+        phoneNumber: raw.phoneNumber || null,
         linkedInUrl: raw.linkedInUrl || null,
         companyId: this.companyId()
       })

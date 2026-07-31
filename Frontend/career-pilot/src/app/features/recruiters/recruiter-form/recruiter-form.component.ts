@@ -35,6 +35,7 @@ export class RecruiterFormComponent {
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(200)]],
     email: ['', [Validators.email]],
+    phoneNumber: [''],
     linkedInUrl: [''],
     companyId: [0, [Validators.required, Validators.min(1)]]
   });
@@ -52,6 +53,7 @@ export class RecruiterFormComponent {
         this.form.patchValue({
           name: recruiter.name,
           email: recruiter.email ?? '',
+          phoneNumber: recruiter.phoneNumber ?? '',
           linkedInUrl: recruiter.linkedInUrl ?? '',
           companyId: recruiter.companyId
         });
@@ -79,6 +81,7 @@ export class RecruiterFormComponent {
     const request: RecruiterUpsertRequest = {
       name: raw.name,
       email: raw.email || null,
+      phoneNumber: raw.phoneNumber || null,
       linkedInUrl: raw.linkedInUrl || null,
       companyId: raw.companyId
     };

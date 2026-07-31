@@ -6,6 +6,7 @@ public record RecruiterDto(
     int Id,
     string Name,
     string? Email,
+    string? PhoneNumber,
     string? LinkedInUrl,
     int CompanyId,
     string CompanyName
@@ -18,6 +19,9 @@ public sealed class RecruiterUpsertRequest
 
     [EmailAddress, MaxLength(200)]
     public string? Email { get; init; }
+
+    [Phone, MaxLength(30)]
+    public string? PhoneNumber { get; init; }
 
     [MaxLength(300), Url]
     public string? LinkedInUrl { get; init; }

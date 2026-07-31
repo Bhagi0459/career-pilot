@@ -51,6 +51,7 @@
           <th>Name</th>
           <th>Company</th>
           <th>Email</th>
+          <th>Mobile</th>
           <th>LinkedIn</th>
           <th></th>
         </tr>
@@ -61,6 +62,7 @@
             <td data-label="Name">{{ recruiter.name }}</td>
             <td data-label="Company">{{ recruiter.companyName }}</td>
             <td data-label="Email">{{ recruiter.email || '—' }}</td>
+            <td data-label="Mobile">{{ recruiter.phoneNumber || '—' }}</td>
             <td data-label="LinkedIn">
               @if (recruiter.linkedInUrl) {
                 <a [href]="recruiter.linkedInUrl" target="_blank" rel="noopener">Profile</a>
