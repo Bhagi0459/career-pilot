@@ -4,6 +4,16 @@
   gap: var(--space-lg);
   align-items: start;
 
+  > * {
+    animation: fadeInUp 0.3s ease both;
+  }
+
+  @for $i from 1 through 4 {
+    > *:nth-child(#{$i}) {
+      animation-delay: #{$i * 60}ms;
+    }
+  }
+
   @media (max-width: 1100px) {
     grid-template-columns: 1fr 1fr;
 
@@ -58,6 +68,7 @@
   align-items: center;
   gap: var(--space-xl);
   flex-wrap: wrap;
+  animation: chartDrawIn 0.4s ease;
 }
 
 .donut-chart {

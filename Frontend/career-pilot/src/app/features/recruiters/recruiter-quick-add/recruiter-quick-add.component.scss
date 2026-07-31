@@ -7,11 +7,13 @@
   justify-content: center;
   z-index: 100;
   padding: var(--space-lg);
+  animation: modalBackdropIn 0.15s ease;
 }
 
 .dialog {
   max-width: 460px;
   width: 100%;
+  animation: modalPopIn 0.2s ease;
 
   h3 {
     margin-bottom: var(--space-xs);

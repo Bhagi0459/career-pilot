@@ -92,6 +92,51 @@ a {
   }
 }
 
+// Shared entrance/modal keyframes. Referenced by name from component stylesheets too - Angular's
+// emulated view encapsulation only scopes selectors, not @keyframes lookups, so a keyframe defined
+// here globally still resolves correctly from a scoped component's `animation:` declaration.
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modalBackdropIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes chartDrawIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .page-subtitle {
   color: var(--color-text-muted);
   font-size: 14px;
@@ -128,7 +173,15 @@ a {
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
-  transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease, transform 0.15s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
 
   &:disabled {
     opacity: 0.6;
@@ -282,6 +335,16 @@ a {
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: var(--space-md);
   margin-bottom: var(--space-lg);
+
+  > * {
+    animation: fadeInUp 0.3s ease both;
+  }
+
+  @for $i from 1 through 6 {
+    > *:nth-child(#{$i}) {
+      animation-delay: #{$i * 60}ms;
+    }
+  }
 }
 
 .error-banner {
@@ -300,6 +363,16 @@ a {
   padding: var(--space-md);
   margin-bottom: var(--space-md);
   font-size: 14px;
+}
+
+// The routed page's root element lands here as the sole sibling of the <router-outlet/>
+// anchor, freshly inserted into the DOM on every navigation (component destroy/recreate) -
+// so this plays like a page transition without touching every page. Has to live in this
+// global (unscoped) stylesheet rather than shell.component.scss: Angular's emulated view
+// encapsulation would otherwise rewrite `.content > *` to require shell's own _ngcontent
+// attribute, which the routed component's dynamically-created host element never carries.
+.content > * {
+  animation: fadeInUp 0.25s ease both;
 }
 
 table.data-table {
@@ -324,6 +397,15 @@ table.data-table {
 
   tbody tr {
     transition: background-color 0.1s ease;
+    animation: fadeInUp 0.25s ease both;
+  }
+
+  // Capped at the first dozen rows - a table of hundreds shouldn't queue up a
+  // multi-second cascade just because every row asked for its own delay slot.
+  @for $i from 1 through 12 {
+    tbody tr:nth-child(#{$i}) {
+      animation-delay: #{$i * 30}ms;
+    }
   }
 
   tbody tr:hover {
