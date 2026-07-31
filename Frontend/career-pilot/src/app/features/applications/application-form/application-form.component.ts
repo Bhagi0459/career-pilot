@@ -6,13 +6,21 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ApplicationsService } from '../applications.service';
 import { CompaniesService } from '../../companies/companies.service';
 import { RecruitersService } from '../../recruiters/recruiters.service';
-import { APPLICATION_STATUSES, ApplicationStatus, JobApplicationUpsertRequest } from '../../../shared/models';
+import { CompanyQuickAddComponent } from '../../companies/company-quick-add/company-quick-add.component';
+import { RecruiterQuickAddComponent } from '../../recruiters/recruiter-quick-add/recruiter-quick-add.component';
+import {
+  APPLICATION_STATUSES,
+  ApplicationStatus,
+  Company,
+  JobApplicationUpsertRequest,
+  Recruiter
+} from '../../../shared/models';
 import { AutofocusDirective } from '../../../shared/directives/autofocus.directive';
 
 @Component({
   selector: 'app-application-form',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, AutofocusDirective],
+  imports: [ReactiveFormsModule, RouterLink, AutofocusDirective, CompanyQuickAddComponent, RecruiterQuickAddComponent],
   templateUrl: './application-form.component.html',
   styleUrl: './application-form.component.scss'
 })
@@ -45,13 +53,20 @@ export class ApplicationFormComponent {
   // Mirrors the companyId control so the recruiter dropdown can filter reactively.
   // Driven by valueChanges (not a manually-set signal) so it stays correct for both
   // user selection AND the patchValue() used when loading an application for edit.
-  private readonly selectedCompanyId = toSignal(this.form.controls.companyId.valueChanges, {
+  readonly selectedCompanyId = toSignal(this.form.controls.companyId.valueChanges, {
     initialValue: this.form.controls.companyId.value
   });
 
   readonly filteredRecruiters = computed(() =>
     this.recruitersService.recruiters().filter((r) => r.companyId === this.selectedCompanyId())
   );
+
+  readonly selectedCompanyName = computed(
+    () => this.companies().find((c) => c.id === this.selectedCompanyId())?.name ?? null
+  );
+
+  readonly showCompanyModal = signal(false);
+  readonly showRecruiterModal = signal(false);
 
   constructor() {
     if (this.companies().length === 0) {
@@ -93,6 +108,21 @@ export class ApplicationFormComponent {
     if (!recruiterBelongsToCompany) {
       this.form.controls.recruiterId.setValue(0);
     }
+  }
+
+  // Fired from the "+ New company" modal opened next to the Company select, so a company
+  // discovered mid-application doesn't force the user to abandon this form to go create it.
+  onCompanyCreated(company: Company): void {
+    this.showCompanyModal.set(false);
+    this.form.controls.companyId.setValue(company.id);
+    this.onCompanyChange();
+  }
+
+  // Same idea for the recruiter dropdown - the quick-add modal is only reachable once a
+  // company is selected, since a recruiter must belong to one.
+  onRecruiterCreated(recruiter: Recruiter): void {
+    this.showRecruiterModal.set(false);
+    this.form.controls.recruiterId.setValue(recruiter.id);
   }
 
   submit(): void {

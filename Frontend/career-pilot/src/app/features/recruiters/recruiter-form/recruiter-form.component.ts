@@ -4,13 +4,14 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { RecruitersService } from '../recruiters.service';
 import { CompaniesService } from '../../companies/companies.service';
-import { RecruiterUpsertRequest } from '../../../shared/models';
+import { CompanyQuickAddComponent } from '../../companies/company-quick-add/company-quick-add.component';
+import { Company, RecruiterUpsertRequest } from '../../../shared/models';
 import { AutofocusDirective } from '../../../shared/directives/autofocus.directive';
 
 @Component({
   selector: 'app-recruiter-form',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, AutofocusDirective],
+  imports: [ReactiveFormsModule, RouterLink, AutofocusDirective, CompanyQuickAddComponent],
   templateUrl: './recruiter-form.component.html',
   styleUrl: './recruiter-form.component.scss'
 })
@@ -28,6 +29,8 @@ export class RecruiterFormComponent {
   readonly recruiterId = signal<number | null>(null);
 
   readonly isEditMode = computed(() => this.recruiterId() !== null);
+
+  readonly showCompanyModal = signal(false);
 
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(200)]],
@@ -54,6 +57,13 @@ export class RecruiterFormComponent {
         });
       });
     }
+  }
+
+  // Fired from the "+ New company" modal opened next to the Company select, so a company
+  // discovered while adding a recruiter doesn't force the user to abandon this form.
+  onCompanyCreated(company: Company): void {
+    this.showCompanyModal.set(false);
+    this.form.controls.companyId.setValue(company.id);
   }
 
   submit(): void {

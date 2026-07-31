@@ -1,0 +1,43 @@
+<div class="backdrop" (click)="cancelled.emit()">
+  <div class="dialog card" (click)="$event.stopPropagation()">
+    <h3>Add a new recruiter</h3>
+    @if (companyName()) {
+      <p class="dialog-subtitle">for {{ companyName() }}</p>
+    }
+
+    @if (errorMessage()) {
+      <div class="error-banner">{{ errorMessage() }}</div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="form-field">
+        <label for="quickRecruiterName">Name</label>
+        <input id="quickRecruiterName" formControlName="name" appAutofocus />
+        @if (form.controls.name.invalid && form.controls.name.touched) {
+          <span class="field-error">Name is required.</span>
+        }
+      </div>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label for="quickRecruiterEmail">Email</label>
+          <input id="quickRecruiterEmail" type="email" formControlName="email" />
+          @if (form.controls.email.invalid && form.controls.email.touched) {
+            <span class="field-error">Enter a valid email address.</span>
+          }
+        </div>
+        <div class="form-field">
+          <label for="quickRecruiterLinkedIn">LinkedIn URL</label>
+          <input id="quickRecruiterLinkedIn" formControlName="linkedInUrl" placeholder="https://linkedin.com/in/…" />
+        </div>
+      </div>
+
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-secondary" (click)="cancelled.emit()">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Saving…' : 'Add recruiter' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

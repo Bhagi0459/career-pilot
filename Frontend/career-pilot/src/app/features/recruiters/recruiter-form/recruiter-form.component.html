@@ -16,7 +16,10 @@
   </div>
 
   <div class="form-field">
-    <label for="companyId">Company</label>
+    <div class="field-label-row">
+      <label for="companyId">Company</label>
+      <button type="button" class="link-btn" (click)="showCompanyModal.set(true)">+ New company</button>
+    </div>
     <select id="companyId" formControlName="companyId">
       <option [ngValue]="0" disabled>Select a company</option>
       @for (company of companies(); track company.id) {
@@ -49,3 +52,7 @@
     <a routerLink="/recruiters" class="btn btn-secondary">Cancel</a>
   </div>
 </form>
+
+@if (showCompanyModal()) {
+  <app-company-quick-add (created)="onCompanyCreated($event)" (cancelled)="showCompanyModal.set(false)" />
+}

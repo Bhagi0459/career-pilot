@@ -17,7 +17,10 @@
 
   <div class="form-row">
     <div class="form-field">
-      <label for="companyId">Company</label>
+      <div class="field-label-row">
+        <label for="companyId">Company</label>
+        <button type="button" class="link-btn" (click)="showCompanyModal.set(true)">+ New company</button>
+      </div>
       <select id="companyId" formControlName="companyId" (change)="onCompanyChange()">
         <option [ngValue]="0" disabled>Select a company</option>
         @for (company of companies(); track company.id) {
@@ -30,7 +33,18 @@
     </div>
 
     <div class="form-field">
-      <label for="recruiterId">Recruiter (optional)</label>
+      <div class="field-label-row">
+        <label for="recruiterId">Recruiter (optional)</label>
+        <button
+          type="button"
+          class="link-btn"
+          [disabled]="!selectedCompanyId()"
+          [title]="selectedCompanyId() ? '' : 'Select a company first'"
+          (click)="showRecruiterModal.set(true)"
+        >
+          + New recruiter
+        </button>
+      </div>
       <select id="recruiterId" formControlName="recruiterId">
         <option [ngValue]="0">No recruiter</option>
         @for (recruiter of filteredRecruiters(); track recruiter.id) {
@@ -73,3 +87,16 @@
     <a routerLink="/applications" class="btn btn-secondary">Cancel</a>
   </div>
 </form>
+
+@if (showCompanyModal()) {
+  <app-company-quick-add (created)="onCompanyCreated($event)" (cancelled)="showCompanyModal.set(false)" />
+}
+
+@if (showRecruiterModal() && selectedCompanyId()) {
+  <app-recruiter-quick-add
+    [companyId]="selectedCompanyId()!"
+    [companyName]="selectedCompanyName()"
+    (created)="onRecruiterCreated($event)"
+    (cancelled)="showRecruiterModal.set(false)"
+  />
+}

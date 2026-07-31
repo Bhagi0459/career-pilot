@@ -238,6 +238,36 @@ a {
   margin-top: var(--space-md);
 }
 
+// Pairs a <label> with a small inline action (e.g. "+ New company") on a select/input field.
+.field-label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+// Same reasoning as .btn/.icon-btn above re: underline - used on <button> only here, but kept
+// consistent with the rest of the control family.
+.link-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-accent);
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    text-decoration: none;
+  }
+}
+
 .page-header {
   display: flex;
   align-items: center;
