@@ -78,7 +78,15 @@
 }
 
 .donut-segment {
-  transition: stroke-dasharray 0.3s ease;
+  transition: stroke-dasharray 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// The background track <circle> (no .donut-segment class) is always the first same-tag
+// sibling, so the segment circles start at position 2, not 1.
+@for $i from 2 through 5 {
+  .donut-segment:nth-of-type(#{$i}) {
+    transition-delay: #{($i - 1) * 90}ms;
+  }
 }
 
 .chart-total {

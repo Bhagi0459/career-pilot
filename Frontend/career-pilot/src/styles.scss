@@ -43,6 +43,38 @@
   --sidebar-width: 260px;
 }
 
+// Applied via the `data-theme` attribute ThemeService sets on <html> (and which index.html's
+// inline script sets pre-paint, to avoid a light-then-dark flash). Only the color/shadow tokens
+// need a dark variant - radius/spacing/sidebar-width are theme-independent.
+:root[data-theme='dark'] {
+  --color-bg: #0f1117;
+  --color-surface: #171a23;
+  --color-sidebar: #0b0d14;
+  --color-sidebar-active: rgba(129, 140, 248, 0.28);
+  --color-text: #e7e9ee;
+  --color-text-muted: #9aa1af;
+  --color-border: #2a2e3a;
+  --color-accent: #818cf8;
+  --color-accent-hover: #a5b4fc;
+
+  --color-success: #4ade80;
+  --color-success-bg: rgba(74, 222, 128, 0.15);
+  --color-warning: #fbbf24;
+  --color-warning-bg: rgba(251, 191, 36, 0.15);
+  --color-danger: #f87171;
+  --color-danger-bg: rgba(248, 113, 113, 0.15);
+  --color-info: #60a5fa;
+  --color-info-bg: rgba(96, 165, 250, 0.15);
+  --color-offer: #4ade80;
+  --color-offer-bg: rgba(74, 222, 128, 0.15);
+  --color-neutral: #cbd5e1;
+  --color-neutral-bg: rgba(203, 213, 225, 0.12);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -58,6 +90,16 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
+}
+
+// A smooth crossfade for the handful of large surfaces most visibly affected when the theme
+// toggle flips --color-* tokens, rather than every themed element repainting instantly.
+body,
+.card,
+.sidebar,
+.topbar,
+.auth-card {
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
 }
 
 h1,

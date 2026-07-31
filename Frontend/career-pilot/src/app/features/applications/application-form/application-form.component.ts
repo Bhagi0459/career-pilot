@@ -75,6 +75,12 @@ export class ApplicationFormComponent {
   readonly showCompanyModal = signal(false);
   readonly showRecruiterModal = signal(false);
 
+  // Tracks the status the application had when this form loaded (null for a brand-new
+  // application), so the celebration only fires the moment a role first *becomes* an Offer -
+  // not every time someone re-saves an application that was already at that stage.
+  private readonly originalStatus = signal<ApplicationStatus | null>(null);
+  readonly showOfferCelebration = signal(false);
+
   constructor() {
     if (this.companies().length === 0) {
       this.companiesService.load();
@@ -88,6 +94,7 @@ export class ApplicationFormComponent {
       const id = Number(idParam);
       this.applicationId.set(id);
       this.applicationsService.getById(id).subscribe((application) => {
+        this.originalStatus.set(application.status);
         this.form.patchValue({
           roleTitle: application.roleTitle,
           status: application.status,
@@ -163,10 +170,20 @@ export class ApplicationFormComponent {
     const id = this.applicationId();
     const request$ = id ? this.applicationsService.update(id, request) : this.applicationsService.create(request);
 
+    const becameOffer = request.status === 'Offer' && this.originalStatus() !== 'Offer';
+
     request$.subscribe({
       next: () => {
         this.saving.set(false);
-        void this.router.navigateByUrl('/applications');
+
+        if (becameOffer) {
+          // Hold on this page just long enough for the celebration to play before leaving -
+          // the applications list has nowhere to show it after navigating away.
+          this.showOfferCelebration.set(true);
+          setTimeout(() => void this.router.navigateByUrl('/applications'), 1400);
+        } else {
+          void this.router.navigateByUrl('/applications');
+        }
       },
       error: (error: HttpErrorResponse) => {
         this.saving.set(false);

@@ -40,7 +40,7 @@
                 stroke-width="16"
                 stroke-linecap="round"
                 [attr.stroke]="segment.color"
-                [attr.stroke-dasharray]="segment.dasharray"
+                [attr.stroke-dasharray]="chartRevealed() ? segment.dasharray : hiddenDasharray"
                 [attr.stroke-dashoffset]="segment.dashoffset"
                 transform="rotate(-90 70 70)"
                 class="donut-segment"

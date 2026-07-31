@@ -1,0 +1,77 @@
+@use 'sass:list';
+
+.celebration-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -5%;
+  width: 8px;
+  height: 14px;
+  opacity: 0;
+  border-radius: 2px;
+  animation: confettiFall 1.6s ease-in forwards;
+}
+
+@keyframes confettiFall {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    opacity: 0.9;
+    transform: translateY(105vh) rotate(600deg);
+  }
+}
+
+// Hardcoded rather than computed (e.g. via math.rem) - the exact spread doesn't need to be
+// truly random, and this sidesteps depending on a specific Dart Sass module/version.
+$confetti-lefts: 8%, 63%, 22%, 78%, 45%, 91%, 15%, 55%, 33%, 70%, 5%, 85%, 60%, 25%;
+$confetti-delays: 0ms, 140ms, 60ms, 300ms, 220ms, 40ms, 380ms, 100ms, 260ms, 180ms, 320ms, 20ms, 200ms, 340ms;
+$confetti-colors: #6366f1, #16a34a, #d97706, #dc2626, #2563eb, #ec4899, #f59e0b, #6366f1, #16a34a, #d97706, #dc2626,
+  #2563eb, #ec4899, #f59e0b;
+
+@for $i from 1 through 14 {
+  .confetti-piece:nth-child(#{$i}) {
+    left: list.nth($confetti-lefts, $i);
+    background: list.nth($confetti-colors, $i);
+    animation-delay: list.nth($confetti-delays, $i);
+  }
+}
+
+.celebration-toast {
+  position: relative;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-lg) var(--space-xl);
+  font-size: 18px;
+  font-weight: 700;
+  animation: toastPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes toastPop {
+  from {
+    opacity: 0;
+    transform: scale(0.85) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

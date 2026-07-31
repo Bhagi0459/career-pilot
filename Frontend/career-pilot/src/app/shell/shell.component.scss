@@ -137,6 +137,40 @@ nav a {
   }
 }
 
+// Same control family as `nav a` above (icon + label, full-width, no default button chrome) so
+// the toggle reads as another nav item rather than a visually distinct control.
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: var(--space-sm);
+  padding: 11px 14px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-sidebar-text);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    background: var(--color-sidebar-hover);
+    color: #fff;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: -2px;
+  }
+}
+
 .nav-scrim {
   display: none;
 }

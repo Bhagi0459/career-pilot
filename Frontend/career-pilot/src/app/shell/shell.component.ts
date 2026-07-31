@@ -10,6 +10,7 @@ import {
 } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
 import { AuthService } from '../core/services/auth.service';
+import { ThemeService } from '../core/services/theme.service';
 
 @Component({
   selector: 'app-shell',
@@ -21,6 +22,7 @@ import { AuthService } from '../core/services/auth.service';
 export class ShellComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  readonly themeService = inject(ThemeService);
 
   readonly currentUserEmail = this.authService.currentUserEmail;
   readonly currentUserDisplayName = this.authService.currentUserDisplayName;

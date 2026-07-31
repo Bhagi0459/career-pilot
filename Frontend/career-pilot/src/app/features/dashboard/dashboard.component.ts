@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ApplicationsService } from '../applications/applications.service';
 import { InterviewsService } from '../interviews/interviews.service';
@@ -10,7 +10,7 @@ import { EmptyStateComponent } from '../../shared/components/empty-state/empty-s
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
 import { TimeAgoPipe } from '../../shared/pipes/time-ago.pipe';
 
-const RADIUS = 60;
+const RADIUS = 58; // Must match the <circle r="58"> in the template.
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 const STATUS_CHART_COLORS: Record<ApplicationStatus, string> = {
@@ -109,10 +109,17 @@ export class DashboardComponent {
       .slice(0, 5)
   );
 
+  // Segments render fully "closed" (dasharray "0 C") on first paint, then flip to their real
+  // computed dasharray a tick later - the existing CSS transition on stroke-dasharray turns that
+  // into a sweep-in draw instead of the chart just appearing fully formed.
+  readonly chartRevealed = signal(false);
+  readonly hiddenDasharray = `0 ${CIRCUMFERENCE}`;
+
   constructor() {
     this.applicationsService.loadAll();
     this.interviewsService.load();
     this.followUpsService.load();
+    setTimeout(() => this.chartRevealed.set(true));
   }
 
   private countByStatus(status: ApplicationStatus): number {

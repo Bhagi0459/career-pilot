@@ -7,6 +7,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <script>
+    // Applied before any CSS paints, so the correct theme is there on first frame instead of
+    // flashing light-then-dark. ThemeService picks up from here once Angular boots.
+    (function () {
+      var stored = localStorage.getItem('careerpilot.theme');
+      var theme = stored === 'light' || stored === 'dark'
+        ? stored
+        : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
 </head>
 <body>
   <app-root></app-root>
