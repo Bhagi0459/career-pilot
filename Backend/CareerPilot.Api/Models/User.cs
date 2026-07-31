@@ -12,4 +12,5 @@ public class User
     public ICollection<Recruiter> Recruiters { get; set; } = new List<Recruiter>();
     public ICollection<JobApplication> JobApplications { get; set; } = new List<JobApplication>();
     public ICollection<PasswordResetToken> PasswordResetTokens { get; set; } = new List<PasswordResetToken>();
+    public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 }

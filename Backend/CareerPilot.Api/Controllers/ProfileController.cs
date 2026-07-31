@@ -57,6 +57,17 @@ public class ProfileController(AppDbContext db) : ControllerBase
         }
 
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+
+        // A changed password should kill any other sessions logged in with the old one, the same
+        // way a forgot-password reset does.
+        var activeRefreshTokens = await db.RefreshTokens
+            .Where(t => t.UserId == userId && t.RevokedAt == null)
+            .ToListAsync();
+        foreach (var refreshToken in activeRefreshTokens)
+        {
+            refreshToken.RevokedAt = DateTime.UtcNow;
+        }
+
         await db.SaveChangesAsync();
 
         return NoContent();

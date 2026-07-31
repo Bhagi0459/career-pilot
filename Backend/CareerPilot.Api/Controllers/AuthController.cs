@@ -18,7 +18,9 @@ public class AuthController(
     IConfiguration configuration) : ControllerBase
 {
     private const int ResetTokenExpiryMinutes = 30;
+    private const int RefreshTokenExpiryDays = 30;
     private const string DuplicateEmailMessage = "An account with this email already exists. Try resetting your password instead.";
+    private const string InvalidRefreshTokenMessage = "Invalid or expired refresh token.";
 
     [HttpPost("register")]
     public async Task<ActionResult<AuthResponse>> Register(RegisterRequest request)
@@ -53,7 +55,9 @@ public class AuthController(
         }
 
         var (token, expiresAt) = tokenService.CreateToken(user);
-        return Ok(new AuthResponse(token, user.Email, user.DisplayName, expiresAt));
+        var refreshToken = await IssueRefreshTokenAsync(user);
+        await db.SaveChangesAsync();
+        return Ok(new AuthResponse(token, refreshToken, user.Email, user.DisplayName, expiresAt));
     }
 
     [HttpPost("login")]
@@ -68,7 +72,70 @@ public class AuthController(
         }
 
         var (token, expiresAt) = tokenService.CreateToken(user);
-        return Ok(new AuthResponse(token, user.Email, user.DisplayName, expiresAt));
+        var refreshToken = await IssueRefreshTokenAsync(user);
+        await db.SaveChangesAsync();
+        return Ok(new AuthResponse(token, refreshToken, user.Email, user.DisplayName, expiresAt));
+    }
+
+    // Exchanges a still-valid refresh token for a new access token, rotating the refresh token
+    // in the same call so a stolen-but-unused refresh token stops working the moment the
+    // legitimate client refreshes first.
+    [HttpPost("refresh")]
+    public async Task<ActionResult<AuthResponse>> Refresh(RefreshRequest request)
+    {
+        var tokenHash = HashToken(request.RefreshToken);
+        var storedToken = await db.RefreshTokens
+            .Include(t => t.User)
+            .SingleOrDefaultAsync(t => t.TokenHash == tokenHash);
+
+        if (storedToken is null || storedToken.ExpiresAt < DateTime.UtcNow)
+        {
+            return Unauthorized(new { message = InvalidRefreshTokenMessage });
+        }
+
+        if (storedToken.RevokedAt is not null)
+        {
+            // This exact token was already rotated away or logged out, and yet it's being
+            // presented again - that's the signature of a stolen refresh token being replayed.
+            // Kill every other active refresh token for this user as a precaution and force a
+            // fresh login everywhere.
+            var activeTokens = await db.RefreshTokens
+                .Where(t => t.UserId == storedToken.UserId && t.RevokedAt == null)
+                .ToListAsync();
+            foreach (var active in activeTokens)
+            {
+                active.RevokedAt = DateTime.UtcNow;
+            }
+            await db.SaveChangesAsync();
+
+            return Unauthorized(new { message = InvalidRefreshTokenMessage });
+        }
+
+        storedToken.RevokedAt = DateTime.UtcNow;
+
+        var (accessToken, expiresAt) = tokenService.CreateToken(storedToken.User);
+        var newRefreshToken = await IssueRefreshTokenAsync(storedToken.User);
+
+        await db.SaveChangesAsync();
+
+        return Ok(new AuthResponse(accessToken, newRefreshToken, storedToken.User.Email, storedToken.User.DisplayName, expiresAt));
+    }
+
+    // No [Authorize] here on purpose - the access token may already be expired by the time the
+    // user logs out, and revoking the session only needs the refresh token, not a valid JWT.
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout(RefreshRequest request)
+    {
+        var tokenHash = HashToken(request.RefreshToken);
+        var storedToken = await db.RefreshTokens.SingleOrDefaultAsync(t => t.TokenHash == tokenHash);
+
+        if (storedToken is not null && storedToken.RevokedAt is null)
+        {
+            storedToken.RevokedAt = DateTime.UtcNow;
+            await db.SaveChangesAsync();
+        }
+
+        return NoContent();
     }
 
     [HttpPost("forgot-password")]
@@ -82,12 +149,12 @@ public class AuthController(
         // oracle an attacker can use to enumerate registered emails.
         if (user is not null)
         {
-            var rawToken = GenerateResetToken();
+            var rawToken = GenerateOpaqueToken();
 
             db.PasswordResetTokens.Add(new PasswordResetToken
             {
                 UserId = user.Id,
-                TokenHash = HashResetToken(rawToken),
+                TokenHash = HashToken(rawToken),
                 ExpiresAt = DateTime.UtcNow.AddMinutes(ResetTokenExpiryMinutes)
             });
             await db.SaveChangesAsync();
@@ -103,7 +170,7 @@ public class AuthController(
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
     {
-        var tokenHash = HashResetToken(request.Token);
+        var tokenHash = HashToken(request.Token);
         var resetToken = await db.PasswordResetTokens
             .Include(t => t.User)
             .SingleOrDefaultAsync(t => t.TokenHash == tokenHash);
@@ -127,18 +194,42 @@ public class AuthController(
             other.UsedAt = DateTime.UtcNow;
         }
 
+        // A password reset means the old password (and whatever guessed/leaked it) should no
+        // longer be able to keep an existing session alive via its refresh token either.
+        var activeRefreshTokens = await db.RefreshTokens
+            .Where(t => t.UserId == resetToken.UserId && t.RevokedAt == null)
+            .ToListAsync();
+        foreach (var refreshToken in activeRefreshTokens)
+        {
+            refreshToken.RevokedAt = DateTime.UtcNow;
+        }
+
         await db.SaveChangesAsync();
 
         return NoContent();
     }
 
-    private static string GenerateResetToken()
+    private async Task<string> IssueRefreshTokenAsync(User user)
+    {
+        var rawToken = GenerateOpaqueToken();
+
+        db.RefreshTokens.Add(new RefreshToken
+        {
+            UserId = user.Id,
+            TokenHash = HashToken(rawToken),
+            ExpiresAt = DateTime.UtcNow.AddDays(RefreshTokenExpiryDays)
+        });
+
+        return rawToken;
+    }
+
+    private static string GenerateOpaqueToken()
     {
         var bytes = RandomNumberGenerator.GetBytes(32);
         return Convert.ToBase64String(bytes).Replace('+', '-').Replace('/', '_').TrimEnd('=');
     }
 
-    private static string HashResetToken(string rawToken)
+    private static string HashToken(string rawToken)
     {
         var hash = SHA256.HashData(Encoding.UTF8.GetBytes(rawToken));
         return Convert.ToHexString(hash);

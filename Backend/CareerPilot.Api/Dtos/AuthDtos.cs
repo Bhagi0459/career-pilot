@@ -23,7 +23,7 @@ public sealed class LoginRequest
     public string Password { get; init; } = string.Empty;
 }
 
-public record AuthResponse(string Token, string Email, string DisplayName, DateTime ExpiresAt);
+public record AuthResponse(string Token, string RefreshToken, string Email, string DisplayName, DateTime ExpiresAt);
 
 public sealed class ForgotPasswordRequest
 {
@@ -38,4 +38,10 @@ public sealed class ResetPasswordRequest
 
     [Required, MinLength(8)]
     public string NewPassword { get; init; } = string.Empty;
+}
+
+public sealed class RefreshRequest
+{
+    [Required]
+    public string RefreshToken { get; init; } = string.Empty;
 }

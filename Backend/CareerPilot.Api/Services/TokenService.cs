@@ -15,7 +15,10 @@ public class TokenService(IConfiguration configuration) : ITokenService
             ?? throw new InvalidOperationException("Jwt:Key is not configured.");
         var issuer = jwtSection["Issuer"] ?? "CareerPilot.Api";
         var audience = jwtSection["Audience"] ?? "CareerPilot.Client";
-        var expiresMinutes = int.TryParse(jwtSection["ExpiresMinutes"], out var minutes) ? minutes : 60 * 24 * 7;
+        // Short-lived on purpose - the refresh token (issued alongside this and stored
+        // server-side) is what carries the actual session length now, so a stolen access
+        // token has a small window to be useful instead of staying valid for a week.
+        var expiresMinutes = int.TryParse(jwtSection["ExpiresMinutes"], out var minutes) ? minutes : 30;
 
         var expiresAt = DateTime.UtcNow.AddMinutes(expiresMinutes);
 
