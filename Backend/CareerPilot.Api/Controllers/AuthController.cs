@@ -18,6 +18,7 @@ public class AuthController(
     IConfiguration configuration) : ControllerBase
 {
     private const int ResetTokenExpiryMinutes = 30;
+    private const string DuplicateEmailMessage = "An account with this email already exists. Try resetting your password instead.";
 
     [HttpPost("register")]
     public async Task<ActionResult<AuthResponse>> Register(RegisterRequest request)
@@ -26,7 +27,7 @@ public class AuthController(
 
         if (await db.Users.AnyAsync(u => u.Email == normalizedEmail))
         {
-            return Conflict(new { message = "An account with this email already exists." });
+            return Conflict(new { message = DuplicateEmailMessage });
         }
 
         var user = new User
@@ -37,7 +38,19 @@ public class AuthController(
         };
 
         db.Users.Add(user);
-        await db.SaveChangesAsync();
+
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            // Email is the only unique constraint on Users, so a DbUpdateException here means a
+            // concurrent request for this same not-yet-existing email won the race between our
+            // AnyAsync check above and this insert. Surface the same friendly conflict instead of
+            // letting the exception reach the global handler as an opaque 500.
+            return Conflict(new { message = DuplicateEmailMessage });
+        }
 
         var (token, expiresAt) = tokenService.CreateToken(user);
         return Ok(new AuthResponse(token, user.Email, user.DisplayName, expiresAt));
