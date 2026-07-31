@@ -75,6 +75,33 @@
     <input id="country" formControlName="country" placeholder="e.g. Germany" />
   </div>
 
+  <div class="form-row">
+    <div class="form-field">
+      <label for="salary">Salary / CTC (optional)</label>
+      <input id="salary" formControlName="salary" placeholder="e.g. $120k + 10% bonus" />
+    </div>
+
+    <div class="form-field">
+      <label for="workMode">Work mode (optional)</label>
+      <select id="workMode" formControlName="workMode">
+        <option value="">Not specified</option>
+        @for (mode of workModes; track mode) {
+          <option [value]="mode">{{ mode }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <div class="form-field">
+    <label for="offerDeadline">Decision deadline (optional)</label>
+    <input id="offerDeadline" type="date" formControlName="offerDeadline" />
+  </div>
+
+  <div class="form-field">
+    <label for="benefits">Benefits / perks (optional)</label>
+    <textarea id="benefits" formControlName="benefits" rows="3" placeholder="e.g. Health insurance, remote stipend, 25 PTO days"></textarea>
+  </div>
+
   <div class="form-field">
     <label for="notes">Notes</label>
     <textarea id="notes" formControlName="notes" rows="4"></textarea>

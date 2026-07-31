@@ -1,4 +1,4 @@
-import { ApplicationStatus } from './enums';
+import { ApplicationStatus, WorkMode } from './enums';
 
 export interface JobApplication {
   id: number;
@@ -7,6 +7,10 @@ export interface JobApplication {
   country: string | null;
   appliedDate: string;
   notes: string | null;
+  salary: string | null;
+  workMode: WorkMode | null;
+  offerDeadline: string | null;
+  benefits: string | null;
   companyId: number;
   companyName: string;
   recruiterId: number | null;
@@ -19,6 +23,10 @@ export interface JobApplicationUpsertRequest {
   country: string | null;
   appliedDate: string;
   notes: string | null;
+  salary: string | null;
+  workMode: WorkMode | null;
+  offerDeadline: string | null;
+  benefits: string | null;
   companyId: number;
   recruiterId: number | null;
 }

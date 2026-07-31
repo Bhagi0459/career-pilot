@@ -10,6 +10,10 @@ public record JobApplicationDto(
     string? Country,
     DateTime AppliedDate,
     string? Notes,
+    string? Salary,
+    WorkMode? WorkMode,
+    DateTime? OfferDeadline,
+    string? Benefits,
     int CompanyId,
     string CompanyName,
     int? RecruiterId,
@@ -32,6 +36,16 @@ public sealed class JobApplicationUpsertRequest
 
     [MaxLength(2000)]
     public string? Notes { get; init; }
+
+    [MaxLength(200)]
+    public string? Salary { get; init; }
+
+    public WorkMode? WorkMode { get; init; }
+
+    public DateTime? OfferDeadline { get; init; }
+
+    [MaxLength(2000)]
+    public string? Benefits { get; init; }
 
     [Required]
     public int CompanyId { get; init; }

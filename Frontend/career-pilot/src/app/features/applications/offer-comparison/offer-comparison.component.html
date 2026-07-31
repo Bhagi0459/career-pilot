@@ -1,0 +1,88 @@
+<div class="page-header">
+  <div>
+    <h2>Compare Offers</h2>
+    <p class="page-subtitle">Every application at the Offer stage, side by side.</p>
+  </div>
+  <a routerLink="/applications" class="btn btn-secondary">Back to applications</a>
+</div>
+
+@if (error()) {
+  <div class="error-banner">{{ error() }}</div>
+}
+
+@if (loading()) {
+  <app-loading-spinner />
+} @else if (offers().length === 0) {
+  <app-empty-state
+    title="No offers to compare yet"
+    message="Once an application's status is set to Offer, it'll show up here for comparison."
+  >
+    <a routerLink="/applications" class="btn btn-primary">View applications</a>
+  </app-empty-state>
+} @else {
+  <div class="card compare-scroll">
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th class="compare-label-col"></th>
+          @for (offer of offers(); track offer.id) {
+            <th>
+              <div class="compare-role">{{ offer.roleTitle }}</div>
+              <div class="compare-company">{{ offer.companyName }}</div>
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="compare-label-col">Salary / CTC</td>
+          @for (offer of offers(); track offer.id) {
+            <td>{{ offer.salary || '—' }}</td>
+          }
+        </tr>
+        <tr>
+          <td class="compare-label-col">Work mode</td>
+          @for (offer of offers(); track offer.id) {
+            <td>{{ offer.workMode || '—' }}</td>
+          }
+        </tr>
+        <tr>
+          <td class="compare-label-col">Decision deadline</td>
+          @for (offer of offers(); track offer.id) {
+            <td>{{ offer.offerDeadline ? (offer.offerDeadline | timeAgo) : '—' }}</td>
+          }
+        </tr>
+        <tr>
+          <td class="compare-label-col">Country</td>
+          @for (offer of offers(); track offer.id) {
+            <td>{{ offer.country || '—' }}</td>
+          }
+        </tr>
+        <tr>
+          <td class="compare-label-col">Recruiter</td>
+          @for (offer of offers(); track offer.id) {
+            <td>{{ offer.recruiterName || '—' }}</td>
+          }
+        </tr>
+        <tr>
+          <td class="compare-label-col">Benefits</td>
+          @for (offer of offers(); track offer.id) {
+            <td class="compare-longtext">{{ offer.benefits || '—' }}</td>
+          }
+        </tr>
+        <tr>
+          <td class="compare-label-col">Notes</td>
+          @for (offer of offers(); track offer.id) {
+            <td class="compare-longtext">{{ offer.notes || '—' }}</td>
+          }
+        </tr>
+        <tr>
+          <td class="compare-label-col"></td>
+          @for (offer of offers(); track offer.id) {
+            <td><a [routerLink]="['/applications', offer.id, 'edit']" class="icon-btn">Edit</a></td>
+          }
+        </tr>
+      </tbody>
+    </table>
+  </div>
+}

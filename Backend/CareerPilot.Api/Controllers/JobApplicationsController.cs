@@ -64,6 +64,7 @@ public class JobApplicationsController(AppDbContext db) : ControllerBase
             .Take(pageSize)
             .Select(a => new JobApplicationDto(
                 a.Id, a.RoleTitle, a.Status, a.Country, a.AppliedDate, a.Notes,
+                a.Salary, a.WorkMode, a.OfferDeadline, a.Benefits,
                 a.CompanyId, a.Company!.Name, a.RecruiterId, a.Recruiter != null ? a.Recruiter.Name : null))
             .ToListAsync();
 
@@ -83,6 +84,7 @@ public class JobApplicationsController(AppDbContext db) : ControllerBase
             .OrderByDescending(a => a.AppliedDate)
             .Select(a => new JobApplicationDto(
                 a.Id, a.RoleTitle, a.Status, a.Country, a.AppliedDate, a.Notes,
+                a.Salary, a.WorkMode, a.OfferDeadline, a.Benefits,
                 a.CompanyId, a.Company!.Name, a.RecruiterId, a.Recruiter != null ? a.Recruiter.Name : null))
             .ToListAsync();
 
@@ -97,6 +99,7 @@ public class JobApplicationsController(AppDbContext db) : ControllerBase
             .Where(a => a.Id == id && a.UserId == userId)
             .Select(a => new JobApplicationDto(
                 a.Id, a.RoleTitle, a.Status, a.Country, a.AppliedDate, a.Notes,
+                a.Salary, a.WorkMode, a.OfferDeadline, a.Benefits,
                 a.CompanyId, a.Company!.Name, a.RecruiterId, a.Recruiter != null ? a.Recruiter.Name : null))
             .SingleOrDefaultAsync();
 
@@ -126,7 +129,11 @@ public class JobApplicationsController(AppDbContext db) : ControllerBase
             Status = request.Status,
             Country = request.Country,
             AppliedDate = request.AppliedDate,
-            Notes = request.Notes
+            Notes = request.Notes,
+            Salary = request.Salary,
+            WorkMode = request.WorkMode,
+            OfferDeadline = request.OfferDeadline,
+            Benefits = request.Benefits
         };
 
         db.JobApplications.Add(application);
@@ -164,6 +171,10 @@ public class JobApplicationsController(AppDbContext db) : ControllerBase
         application.Country = request.Country;
         application.AppliedDate = request.AppliedDate;
         application.Notes = request.Notes;
+        application.Salary = request.Salary;
+        application.WorkMode = request.WorkMode;
+        application.OfferDeadline = request.OfferDeadline;
+        application.Benefits = request.Benefits;
 
         await db.SaveChangesAsync();
 
@@ -188,5 +199,6 @@ public class JobApplicationsController(AppDbContext db) : ControllerBase
 
     private static JobApplicationDto ToDto(JobApplication a) => new(
         a.Id, a.RoleTitle, a.Status, a.Country, a.AppliedDate, a.Notes,
+        a.Salary, a.WorkMode, a.OfferDeadline, a.Benefits,
         a.CompanyId, a.Company!.Name, a.RecruiterId, a.Recruiter != null ? a.Recruiter.Name : null);
 }

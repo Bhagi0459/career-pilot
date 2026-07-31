@@ -13,7 +13,9 @@ import {
   ApplicationStatus,
   Company,
   JobApplicationUpsertRequest,
-  Recruiter
+  Recruiter,
+  WORK_MODES,
+  WorkMode
 } from '../../../shared/models';
 import { AutofocusDirective } from '../../../shared/directives/autofocus.directive';
 
@@ -34,6 +36,7 @@ export class ApplicationFormComponent {
 
   readonly companies = this.companiesService.companies;
   readonly statuses = APPLICATION_STATUSES;
+  readonly workModes = WORK_MODES;
 
   readonly saving = signal(false);
   readonly errorMessage = signal<string | null>(null);
@@ -46,6 +49,10 @@ export class ApplicationFormComponent {
     country: [''],
     appliedDate: [todayIsoDate(), [Validators.required]],
     notes: [''],
+    salary: [''],
+    workMode: ['' as WorkMode | ''],
+    offerDeadline: [''],
+    benefits: [''],
     companyId: [0, [Validators.required, Validators.min(1)]],
     recruiterId: [0]
   });
@@ -87,6 +94,10 @@ export class ApplicationFormComponent {
           country: application.country ?? '',
           appliedDate: application.appliedDate.substring(0, 10),
           notes: application.notes ?? '',
+          salary: application.salary ?? '',
+          workMode: application.workMode ?? '',
+          offerDeadline: application.offerDeadline ? application.offerDeadline.substring(0, 10) : '',
+          benefits: application.benefits ?? '',
           companyId: application.companyId,
           recruiterId: application.recruiterId ?? 0
         });
@@ -141,6 +152,10 @@ export class ApplicationFormComponent {
       country: raw.country || null,
       appliedDate: new Date(raw.appliedDate).toISOString(),
       notes: raw.notes || null,
+      salary: raw.salary || null,
+      workMode: raw.workMode || null,
+      offerDeadline: raw.offerDeadline ? new Date(raw.offerDeadline).toISOString() : null,
+      benefits: raw.benefits || null,
       companyId: raw.companyId,
       recruiterId: raw.recruiterId || null
     };

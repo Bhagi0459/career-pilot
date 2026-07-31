@@ -40,6 +40,14 @@ export const routes: Routes = [
         data: { title: 'Applications' }
       },
       {
+        path: 'applications/compare',
+        loadComponent: () =>
+          import('./features/applications/offer-comparison/offer-comparison.component').then(
+            (m) => m.OfferComparisonComponent
+          ),
+        data: { title: 'Compare Offers' }
+      },
+      {
         path: 'applications/new',
         loadComponent: () =>
           import('./features/applications/application-form/application-form.component').then(
