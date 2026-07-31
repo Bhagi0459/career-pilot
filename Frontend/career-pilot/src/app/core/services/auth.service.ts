@@ -31,10 +31,10 @@ export class AuthService {
     return this.auth()?.token ?? null;
   }
 
+  // Deliberately doesn't auto-authenticate like login() does - a fresh registration should
+  // land the user on the login page with a confirmation, not skip straight past it.
   register(request: RegisterRequest): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(`${environment.apiUrl}/auth/register`, request)
-      .pipe(tap((response) => this.setAuth(response)));
+    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/register`, request);
   }
 
   login(request: LoginRequest): Observable<AuthResponse> {

@@ -22,6 +22,7 @@ export class LoginComponent {
   readonly loading = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly passwordChanged = signal(this.route.snapshot.queryParamMap.get('passwordChanged') === 'true');
+  readonly registered = signal(this.route.snapshot.queryParamMap.get('registered') === 'true');
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],

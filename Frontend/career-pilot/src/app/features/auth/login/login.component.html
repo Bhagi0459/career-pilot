@@ -3,6 +3,10 @@
     <div class="auth-logo">CareerPilot</div>
     <p class="auth-subtitle">Sign in to keep tracking your job search.</p>
 
+    @if (registered()) {
+      <div class="success-banner">Account created! Sign in to get started.</div>
+    }
+
     @if (passwordChanged()) {
       <div class="success-banner">Your password was changed. Sign in with your new password.</div>
     }
