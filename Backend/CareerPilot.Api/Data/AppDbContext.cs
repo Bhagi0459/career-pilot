@@ -10,6 +10,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Recruiter> Recruiters => Set<Recruiter>();
     public DbSet<JobApplication> JobApplications => Set<JobApplication>();
     public DbSet<Interview> Interviews => Set<Interview>();
+    public DbSet<FollowUp> FollowUps => Set<FollowUp>();
     public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -64,6 +65,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasOne(i => i.JobApplication)
                 .WithMany(a => a.Interviews)
                 .HasForeignKey(i => i.JobApplicationId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<FollowUp>(entity =>
+        {
+            entity.HasOne(f => f.JobApplication)
+                .WithMany(a => a.FollowUps)
+                .HasForeignKey(f => f.JobApplicationId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 

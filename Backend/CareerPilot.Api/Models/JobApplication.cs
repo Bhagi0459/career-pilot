@@ -21,4 +21,5 @@ public class JobApplication
     public string? Notes { get; set; }
 
     public ICollection<Interview> Interviews { get; set; } = new List<Interview>();
+    public ICollection<FollowUp> FollowUps { get; set; } = new List<FollowUp>();
 }

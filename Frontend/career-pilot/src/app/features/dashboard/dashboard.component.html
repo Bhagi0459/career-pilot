@@ -106,5 +106,27 @@
         </ul>
       }
     </div>
+
+    <div class="card">
+      <div class="card-heading">
+        <h3>Upcoming follow-ups</h3>
+        <a routerLink="/follow-ups" class="card-heading-link">View all</a>
+      </div>
+      @if (upcomingFollowUps().length === 0) {
+        <app-empty-state title="No upcoming follow-ups" message="Reminders you add will show up here." />
+      } @else {
+        <ul class="mini-list">
+          @for (followUp of upcomingFollowUps(); track followUp.id) {
+            <li>
+              <div class="mini-list-main">
+                <strong>{{ followUp.note }}</strong>
+                <span class="mini-list-sub">{{ followUp.roleTitle }} · {{ followUp.companyName }}</span>
+              </div>
+              <span class="mini-list-when">{{ followUp.dueDate | timeAgo }}</span>
+            </li>
+          }
+        </ul>
+      }
+    </div>
   </div>
 }

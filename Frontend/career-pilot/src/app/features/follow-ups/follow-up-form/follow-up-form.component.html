@@ -1,0 +1,42 @@
+<div class="page-header">
+  <h2>{{ isEditMode() ? 'Edit Follow-up' : 'Add Follow-up' }}</h2>
+</div>
+
+@if (errorMessage()) {
+  <div class="error-banner">{{ errorMessage() }}</div>
+}
+
+<form [formGroup]="form" (ngSubmit)="submit()" class="card form-card">
+  <div class="form-field">
+    <label for="jobApplicationId">Application</label>
+    <select id="jobApplicationId" formControlName="jobApplicationId">
+      <option [ngValue]="0" disabled>Select an application</option>
+      @for (application of applications(); track application.id) {
+        <option [ngValue]="application.id">{{ application.roleTitle }} · {{ application.companyName }}</option>
+      }
+    </select>
+    @if (form.controls.jobApplicationId.invalid && form.controls.jobApplicationId.touched) {
+      <span class="field-error">Select an application.</span>
+    }
+  </div>
+
+  <div class="form-field">
+    <label for="note">What do you need to follow up on?</label>
+    <textarea id="note" formControlName="note" appAutofocus rows="3" placeholder="e.g. Check in with recruiter about next steps"></textarea>
+    @if (form.controls.note.invalid && form.controls.note.touched) {
+      <span class="field-error">A note is required.</span>
+    }
+  </div>
+
+  <div class="form-field">
+    <label for="dueDate">Due date</label>
+    <input id="dueDate" type="date" formControlName="dueDate" />
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary" [disabled]="saving()">
+      {{ saving() ? 'Saving…' : 'Save' }}
+    </button>
+    <a routerLink="/follow-ups" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>

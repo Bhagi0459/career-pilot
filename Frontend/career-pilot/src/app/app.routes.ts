@@ -122,6 +122,30 @@ export const routes: Routes = [
         data: { title: 'Edit Interview' }
       },
       {
+        path: 'follow-ups',
+        loadComponent: () =>
+          import('./features/follow-ups/follow-up-list/follow-up-list.component').then(
+            (m) => m.FollowUpListComponent
+          ),
+        data: { title: 'Follow-ups' }
+      },
+      {
+        path: 'follow-ups/new',
+        loadComponent: () =>
+          import('./features/follow-ups/follow-up-form/follow-up-form.component').then(
+            (m) => m.FollowUpFormComponent
+          ),
+        data: { title: 'Add Follow-up' }
+      },
+      {
+        path: 'follow-ups/:id/edit',
+        loadComponent: () =>
+          import('./features/follow-ups/follow-up-form/follow-up-form.component').then(
+            (m) => m.FollowUpFormComponent
+          ),
+        data: { title: 'Edit Follow-up' }
+      },
+      {
         path: 'settings',
         loadComponent: () => import('./features/settings/settings.component').then((m) => m.SettingsComponent),
         data: { title: 'Settings' }

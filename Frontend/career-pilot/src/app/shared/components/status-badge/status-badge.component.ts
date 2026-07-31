@@ -7,7 +7,10 @@ const STATUS_COLOR_MAP: Record<string, string> = {
   Rejected: 'red',
   Scheduled: 'info',
   Completed: 'green',
-  Cancelled: 'red'
+  Cancelled: 'red',
+  Pending: 'info',
+  Overdue: 'red',
+  Done: 'green'
 };
 
 @Component({

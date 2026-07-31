@@ -2,6 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ApplicationsService } from '../applications/applications.service';
 import { InterviewsService } from '../interviews/interviews.service';
+import { FollowUpsService } from '../follow-ups/follow-ups.service';
 import { ApplicationStatus } from '../../shared/models';
 import { StatCardComponent } from '../../shared/components/stat-card/stat-card.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
@@ -37,11 +38,17 @@ interface ChartSegment {
 export class DashboardComponent {
   private readonly applicationsService = inject(ApplicationsService);
   private readonly interviewsService = inject(InterviewsService);
+  private readonly followUpsService = inject(FollowUpsService);
 
   readonly applications = this.applicationsService.allApplications;
   readonly interviews = this.interviewsService.interviews;
-  readonly loading = computed(() => this.applicationsService.allLoading() || this.interviewsService.loading());
-  readonly error = computed(() => this.applicationsService.allError() ?? this.interviewsService.error());
+  readonly followUps = this.followUpsService.followUps;
+  readonly loading = computed(
+    () => this.applicationsService.allLoading() || this.interviewsService.loading() || this.followUpsService.loading()
+  );
+  readonly error = computed(
+    () => this.applicationsService.allError() ?? this.interviewsService.error() ?? this.followUpsService.error()
+  );
 
   readonly totalCount = computed(() => this.applications().length);
   readonly appliedCount = computed(() => this.countByStatus('Applied'));
@@ -95,9 +102,17 @@ export class DashboardComponent {
       });
   });
 
+  readonly upcomingFollowUps = computed(() =>
+    [...this.followUps()]
+      .filter((followUp) => !followUp.isDone)
+      .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+      .slice(0, 5)
+  );
+
   constructor() {
     this.applicationsService.loadAll();
     this.interviewsService.load();
+    this.followUpsService.load();
   }
 
   private countByStatus(status: ApplicationStatus): number {
