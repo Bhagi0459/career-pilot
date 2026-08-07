@@ -85,7 +85,7 @@ public class CompaniesController(AppDbContext db) : ControllerBase
         var company = new Company
         {
             UserId = userId,
-            Name = request.Name,
+            Name = request.Name.Trim(),
             Country = request.Country,
             Website = request.Website,
             Notes = request.Notes
@@ -104,7 +104,7 @@ public class CompaniesController(AppDbContext db) : ControllerBase
         var company = await db.Companies.SingleOrDefaultAsync(c => c.Id == id && c.UserId == userId);
         if (company is null) return NotFound();
 
-        company.Name = request.Name;
+        company.Name = request.Name.Trim();
         company.Country = request.Country;
         company.Website = request.Website;
         company.Notes = request.Notes;
@@ -120,6 +120,24 @@ public class CompaniesController(AppDbContext db) : ControllerBase
         var userId = User.GetUserId();
         var company = await db.Companies.SingleOrDefaultAsync(c => c.Id == id && c.UserId == userId);
         if (company is null) return NotFound();
+
+        // Company -> JobApplication -> {Interview, FollowUp} and Company -> Recruiter are all
+        // configured with cascading deletes at the database level, which would otherwise let one
+        // DELETE here silently wipe out a user's entire application history for this company.
+        // Refuse instead, and tell the caller exactly what's still attached so they can deal with
+        // it deliberately (reassign/delete those records first) rather than losing data by
+        // accident.
+        var applicationCount = await db.JobApplications.CountAsync(a => a.CompanyId == id && a.UserId == userId);
+        var recruiterCount = await db.Recruiters.CountAsync(r => r.CompanyId == id && r.UserId == userId);
+        if (applicationCount > 0 || recruiterCount > 0)
+        {
+            return Conflict(new
+            {
+                message = $"Can't delete {company.Name} — it still has {applicationCount} application(s) and {recruiterCount} recruiter(s) attached. Remove or reassign those first.",
+                applicationCount,
+                recruiterCount
+            });
+        }
 
         db.Companies.Remove(company);
         await db.SaveChangesAsync();

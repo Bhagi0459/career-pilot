@@ -125,7 +125,7 @@ public class JobApplicationsController(AppDbContext db) : ControllerBase
             UserId = userId,
             CompanyId = request.CompanyId,
             RecruiterId = request.RecruiterId,
-            RoleTitle = request.RoleTitle,
+            RoleTitle = request.RoleTitle.Trim(),
             Status = request.Status,
             Country = request.Country,
             AppliedDate = request.AppliedDate,
@@ -166,7 +166,7 @@ public class JobApplicationsController(AppDbContext db) : ControllerBase
 
         application.CompanyId = request.CompanyId;
         application.RecruiterId = request.RecruiterId;
-        application.RoleTitle = request.RoleTitle;
+        application.RoleTitle = request.RoleTitle.Trim();
         application.Status = request.Status;
         application.Country = request.Country;
         application.AppliedDate = request.AppliedDate;

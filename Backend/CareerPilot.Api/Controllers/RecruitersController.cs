@@ -104,8 +104,8 @@ public class RecruitersController(AppDbContext db) : ControllerBase
         {
             UserId = userId,
             CompanyId = request.CompanyId,
-            Name = request.Name,
-            Email = request.Email,
+            Name = request.Name.Trim(),
+            Email = request.Email?.Trim(),
             PhoneNumber = request.PhoneNumber,
             LinkedInUrl = request.LinkedInUrl
         };
@@ -128,8 +128,8 @@ public class RecruitersController(AppDbContext db) : ControllerBase
         var companyExists = await db.Companies.AnyAsync(c => c.Id == request.CompanyId && c.UserId == userId);
         if (!companyExists) return BadRequest(new { message = "Company not found." });
 
-        recruiter.Name = request.Name;
-        recruiter.Email = request.Email;
+        recruiter.Name = request.Name.Trim();
+        recruiter.Email = request.Email?.Trim();
         recruiter.PhoneNumber = request.PhoneNumber;
         recruiter.LinkedInUrl = request.LinkedInUrl;
         recruiter.CompanyId = request.CompanyId;
