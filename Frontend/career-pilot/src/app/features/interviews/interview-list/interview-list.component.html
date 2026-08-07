@@ -57,14 +57,27 @@
       </thead>
       <tbody>
         @for (interview of result().items; track interview.id) {
-          <tr>
+          <tr [class.row-leaving]="deletingId() === interview.id">
             <td data-label="Round">{{ interview.round }}</td>
             <td data-label="Application">{{ interview.roleTitle }} · {{ interview.companyName }}</td>
             <td data-label="Scheduled">{{ interview.scheduledAt | timeAgo }}</td>
             <td data-label="Status"><app-status-badge [status]="interview.status" /></td>
             <td class="table-actions">
-              <a [routerLink]="['/interviews', interview.id, 'edit']" class="icon-btn">Edit</a>
-              <button type="button" class="icon-btn" (click)="confirmDelete(interview)">Delete</button>
+              <a [routerLink]="['/interviews', interview.id, 'edit']" class="icon-btn icon-btn-edit">
+                <svg aria-hidden="true" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                </svg>
+                Edit
+              </a>
+              <button type="button" class="icon-btn icon-btn-delete" (click)="confirmDelete(interview)">
+                <svg aria-hidden="true" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  <line x1="10" y1="11" x2="10" y2="17" />
+                  <line x1="14" y1="11" x2="14" y2="17" />
+                </svg>
+                Delete
+              </button>
             </td>
           </tr>
         }

@@ -8,11 +8,11 @@
   flex-direction: column;
   gap: 10px;
   border-top: 3px solid var(--color-accent);
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 
   &:hover {
     box-shadow: var(--shadow-md);
-    transform: translateY(-1px);
+    transform: translateY(-3px);
   }
 
   &.accent-blue { border-top-color: #2563eb; }

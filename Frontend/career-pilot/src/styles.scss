@@ -12,6 +12,7 @@
   --color-border: #e5e7eb;
   --color-accent: #6366f1;
   --color-accent-hover: #4f46e5;
+  --color-accent-bg: #e0e7ff;
 
   --color-success: #16a34a;
   --color-success-bg: #dcfce7;
@@ -54,6 +55,7 @@
   --color-border: #2a2e3a;
   --color-accent: #818cf8;
   --color-accent-hover: #a5b4fc;
+  --color-accent-bg: rgba(129, 140, 248, 0.16);
 
   --color-success: #4ade80;
   --color-success-bg: rgba(74, 222, 128, 0.15);
@@ -441,7 +443,7 @@ table.data-table {
   }
 
   tbody tr {
-    transition: background-color 0.1s ease;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
     animation: fadeInUp 0.25s ease both;
   }
 
@@ -453,12 +455,28 @@ table.data-table {
     }
   }
 
+  // Box-shadow rather than a transform lift - a translateY on <tr> renders inconsistently across
+  // browsers under table layout, whereas a shadow reads as "elevated" without touching layout.
   tbody tr:hover {
     background: var(--color-bg);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    z-index: 1;
   }
 
   tbody tr:last-child td {
     border-bottom: none;
+  }
+
+  // A row mid-delete fades and slides out rather than the list just instantly jumping the moment
+  // the underlying data refreshes - see `deletingId` in the list component's delete flow. The
+  // actual row removal (data refresh) is deferred until this transition finishes.
+  tbody tr.row-leaving {
+    animation: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    opacity: 0;
+    transform: translateX(-12px);
+    pointer-events: none;
   }
 }
 
@@ -533,17 +551,54 @@ table.data-table {
 // Same reasoning as .btn above - .icon-btn is used on the per-row "Edit" <a> links, which need
 // the underline stripped since they're styled as controls, not inline text.
 .icon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: transparent;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   padding: 6px 10px;
   font-size: 13px;
+  font-weight: 600;
   text-decoration: none;
   cursor: pointer;
   color: var(--color-text);
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+
+  svg {
+    flex-shrink: 0;
+  }
 
   &:hover {
     background: var(--color-bg);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Edit and Delete were visually identical (same neutral color), which meant a moment's read on
+// every row to tell them apart. Color-coding is a much faster visual cue: blue reads as a normal,
+// reversible action; red reads as something to pause on before clicking.
+.icon-btn-edit {
+  color: var(--color-accent);
+  border-color: var(--color-accent-bg);
+
+  &:hover {
+    background: var(--color-accent-bg);
+    border-color: var(--color-accent);
+  }
+}
+
+.icon-btn-delete {
+  color: var(--color-danger);
+  border-color: var(--color-danger-bg);
+
+  &:hover {
+    background: var(--color-danger-bg);
+    border-color: var(--color-danger);
   }
 }
 

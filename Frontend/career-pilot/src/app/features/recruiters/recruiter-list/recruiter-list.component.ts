@@ -14,6 +14,8 @@ import { resolveApiErrorMessage } from '../../../shared/utils/api-error.util';
 
 const PAGE_SIZE = 10;
 const EMPTY_RESULT: PagedResult<Recruiter> = { items: [], totalCount: 0, page: 1, pageSize: PAGE_SIZE };
+// Matches the `tbody tr.row-leaving` transition duration in styles.scss.
+const ROW_LEAVE_ANIMATION_MS = 200;
 
 @Component({
   selector: 'app-recruiter-list',
@@ -38,6 +40,7 @@ export class RecruiterListComponent {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly pendingDelete = signal<Recruiter | null>(null);
+  readonly deletingId = signal<number | null>(null);
 
   readonly totalPages = computed(() => Math.max(1, Math.ceil(this.result().totalCount / PAGE_SIZE)));
 
@@ -95,7 +98,11 @@ export class RecruiterListComponent {
     this.recruitersService.delete(recruiter.id).subscribe({
       next: () => {
         this.pendingDelete.set(null);
-        this.runSearch().subscribe();
+        this.deletingId.set(recruiter.id);
+        setTimeout(() => {
+          this.deletingId.set(null);
+          this.runSearch().subscribe();
+        }, ROW_LEAVE_ANIMATION_MS);
       },
       error: (error: HttpErrorResponse) => {
         this.pendingDelete.set(null);

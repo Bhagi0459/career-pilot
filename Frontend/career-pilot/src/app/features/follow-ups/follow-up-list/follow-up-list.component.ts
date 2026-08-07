@@ -17,6 +17,8 @@ type DoneFilter = '' | 'pending' | 'done';
 
 const PAGE_SIZE = 10;
 const EMPTY_RESULT: PagedResult<FollowUp> = { items: [], totalCount: 0, page: 1, pageSize: PAGE_SIZE };
+// Matches the `tbody tr.row-leaving` transition duration in styles.scss.
+const ROW_LEAVE_ANIMATION_MS = 200;
 
 @Component({
   selector: 'app-follow-up-list',
@@ -46,6 +48,7 @@ export class FollowUpListComponent {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly pendingDelete = signal<FollowUp | null>(null);
+  readonly deletingId = signal<number | null>(null);
 
   readonly totalPages = computed(() => Math.max(1, Math.ceil(this.result().totalCount / PAGE_SIZE)));
 
@@ -112,7 +115,11 @@ export class FollowUpListComponent {
     this.followUpsService.delete(followUp.id).subscribe({
       next: () => {
         this.pendingDelete.set(null);
-        this.runSearch().subscribe();
+        this.deletingId.set(followUp.id);
+        setTimeout(() => {
+          this.deletingId.set(null);
+          this.runSearch().subscribe();
+        }, ROW_LEAVE_ANIMATION_MS);
       },
       error: (error: HttpErrorResponse) => {
         this.pendingDelete.set(null);

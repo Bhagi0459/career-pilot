@@ -13,6 +13,9 @@ import { resolveApiErrorMessage } from '../../../shared/utils/api-error.util';
 
 const PAGE_SIZE = 10;
 const EMPTY_RESULT: PagedResult<Company> = { items: [], totalCount: 0, page: 1, pageSize: PAGE_SIZE };
+// Matches the `tbody tr.row-leaving` transition duration in styles.scss - the actual data refresh
+// (which removes the row for real) waits until the fade/slide-out has visually finished.
+const ROW_LEAVE_ANIMATION_MS = 200;
 
 @Component({
   selector: 'app-company-list',
@@ -33,6 +36,7 @@ export class CompanyListComponent {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly pendingDelete = signal<Company | null>(null);
+  readonly deletingId = signal<number | null>(null);
 
   readonly totalPages = computed(() => Math.max(1, Math.ceil(this.result().totalCount / PAGE_SIZE)));
 
@@ -80,7 +84,13 @@ export class CompanyListComponent {
     this.companiesService.delete(company.id).subscribe({
       next: () => {
         this.pendingDelete.set(null);
-        this.runSearch().subscribe();
+        // The row plays its leaving animation first; only once that's visually finished do we
+        // actually refetch (which is what removes it from `result()` for real).
+        this.deletingId.set(company.id);
+        setTimeout(() => {
+          this.deletingId.set(null);
+          this.runSearch().subscribe();
+        }, ROW_LEAVE_ANIMATION_MS);
       },
       error: (error: HttpErrorResponse) => {
         // A 409 here means the company still has applications/recruiters attached (see
