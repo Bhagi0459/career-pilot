@@ -46,9 +46,15 @@ export class DashboardComponent {
   readonly loading = computed(
     () => this.applicationsService.allLoading() || this.interviewsService.loading() || this.followUpsService.loading()
   );
-  readonly error = computed(
-    () => this.applicationsService.allError() ?? this.interviewsService.error() ?? this.followUpsService.error()
-  );
+  // Combines every source's error rather than `a ?? b ?? c`, which would silently hide the
+  // interviews/follow-ups failure behind the applications one whenever more than one load fails
+  // at once.
+  readonly error = computed(() => {
+    const messages = [this.applicationsService.allError(), this.interviewsService.error(), this.followUpsService.error()].filter(
+      (message): message is string => message !== null
+    );
+    return messages.length > 0 ? [...new Set(messages)].join(' ') : null;
+  });
 
   readonly totalCount = computed(() => this.applications().length);
   readonly appliedCount = computed(() => this.countByStatus('Applied'));

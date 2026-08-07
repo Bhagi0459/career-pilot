@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RecruitersService } from '../recruiters.service';
 import { Recruiter } from '../../../shared/models';
 import { AutofocusDirective } from '../../../shared/directives/autofocus.directive';
+import { resolveApiErrorMessage } from '../../../shared/utils/api-error.util';
 
 @Component({
   selector: 'app-recruiter-quick-add',
@@ -59,7 +60,7 @@ export class RecruiterQuickAddComponent {
         },
         error: (error: HttpErrorResponse) => {
           this.saving.set(false);
-          this.errorMessage.set(error.error?.message ?? 'Could not create this recruiter.');
+          this.errorMessage.set(resolveApiErrorMessage(error, { default: 'Could not create this recruiter.' }));
         }
       });
   }

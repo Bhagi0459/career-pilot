@@ -6,13 +6,13 @@ import { InterviewsService } from '../interviews.service';
 import { ApplicationsService } from '../../applications/applications.service';
 import { INTERVIEW_STATUSES, InterviewStatus, InterviewUpsertRequest } from '../../../shared/models';
 import { AutofocusDirective } from '../../../shared/directives/autofocus.directive';
+import { resolveApiErrorMessage } from '../../../shared/utils/api-error.util';
 
 @Component({
   selector: 'app-interview-form',
   standalone: true,
   imports: [ReactiveFormsModule, RouterLink, AutofocusDirective],
-  templateUrl: './interview-form.component.html',
-  styleUrl: './interview-form.component.scss'
+  templateUrl: './interview-form.component.html'
 })
 export class InterviewFormComponent {
   private readonly fb = inject(FormBuilder);
@@ -91,12 +91,22 @@ export class InterviewFormComponent {
       },
       error: (error: HttpErrorResponse) => {
         this.saving.set(false);
-        this.errorMessage.set(error.error?.message ?? 'Could not save this interview.');
+        this.errorMessage.set(resolveApiErrorMessage(error, { default: 'Could not save this interview.' }));
       }
     });
   }
 }
 
+// Building this from toISOString() (UTC) rather than local Y/M/D/H/M components meant the
+// prefilled "now" was off by the viewer's UTC offset - e.g. 8pm in a UTC-8 timezone would default
+// the picker to 4am the next day. A `datetime-local` input always represents local wall-clock
+// time, so the default fed into it has to be computed the same way.
 function todayIsoDateTime(): string {
-  return new Date().toISOString().substring(0, 16);
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
 }

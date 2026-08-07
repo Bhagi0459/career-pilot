@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -10,6 +11,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { TimeAgoPipe } from '../../../shared/pipes/time-ago.pipe';
+import { resolveApiErrorMessage } from '../../../shared/utils/api-error.util';
 
 const PAGE_SIZE = 10;
 const EMPTY_RESULT: PagedResult<Interview> = { items: [], totalCount: 0, page: 1, pageSize: PAGE_SIZE };
@@ -93,9 +95,15 @@ export class InterviewListComponent {
     if (!interview) {
       return;
     }
-    this.interviewsService.delete(interview.id).subscribe(() => {
-      this.pendingDelete.set(null);
-      this.runSearch().subscribe();
+    this.interviewsService.delete(interview.id).subscribe({
+      next: () => {
+        this.pendingDelete.set(null);
+        this.runSearch().subscribe();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.pendingDelete.set(null);
+        this.error.set(resolveApiErrorMessage(error, { default: 'Could not delete this interview.' }));
+      }
     });
   }
 
@@ -116,8 +124,8 @@ export class InterviewListComponent {
           this.result.set(result);
           this.loading.set(false);
         }),
-        catchError(() => {
-          this.error.set('Could not load interviews.');
+        catchError((error: HttpErrorResponse) => {
+          this.error.set(resolveApiErrorMessage(error, { default: 'Could not load interviews.' }));
           this.loading.set(false);
           return of(EMPTY_RESULT);
         })

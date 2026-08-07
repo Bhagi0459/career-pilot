@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -9,6 +10,7 @@ import { PagedResult, Recruiter } from '../../../shared/models';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { resolveApiErrorMessage } from '../../../shared/utils/api-error.util';
 
 const PAGE_SIZE = 10;
 const EMPTY_RESULT: PagedResult<Recruiter> = { items: [], totalCount: 0, page: 1, pageSize: PAGE_SIZE };
@@ -90,9 +92,15 @@ export class RecruiterListComponent {
     if (!recruiter) {
       return;
     }
-    this.recruitersService.delete(recruiter.id).subscribe(() => {
-      this.pendingDelete.set(null);
-      this.runSearch().subscribe();
+    this.recruitersService.delete(recruiter.id).subscribe({
+      next: () => {
+        this.pendingDelete.set(null);
+        this.runSearch().subscribe();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.pendingDelete.set(null);
+        this.error.set(resolveApiErrorMessage(error, { default: 'Could not delete this recruiter.' }));
+      }
     });
   }
 
@@ -113,8 +121,8 @@ export class RecruiterListComponent {
           this.result.set(result);
           this.loading.set(false);
         }),
-        catchError(() => {
-          this.error.set('Could not load recruiters.');
+        catchError((error: HttpErrorResponse) => {
+          this.error.set(resolveApiErrorMessage(error, { default: 'Could not load recruiters.' }));
           this.loading.set(false);
           return of(EMPTY_RESULT);
         })

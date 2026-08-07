@@ -43,8 +43,8 @@ describe('ApplicationFormComponent (Add mode)', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
 
-    httpMock.expectOne(`${environment.apiUrl}/companies`).flush(COMPANIES);
-    httpMock.expectOne(`${environment.apiUrl}/recruiters`).flush(RECRUITERS);
+    httpMock.expectOne(`${environment.apiUrl}/companies/all`).flush(COMPANIES);
+    httpMock.expectOne(`${environment.apiUrl}/recruiters/all`).flush(RECRUITERS);
     fixture.detectChanges();
   });
 
@@ -122,8 +122,8 @@ describe('ApplicationFormComponent (Edit mode)', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
 
-    httpMock.expectOne(`${environment.apiUrl}/companies`).flush(COMPANIES);
-    httpMock.expectOne(`${environment.apiUrl}/recruiters`).flush(RECRUITERS);
+    httpMock.expectOne(`${environment.apiUrl}/companies/all`).flush(COMPANIES);
+    httpMock.expectOne(`${environment.apiUrl}/recruiters/all`).flush(RECRUITERS);
     httpMock.expectOne(`${environment.apiUrl}/applications/42`).flush({
       id: 42,
       roleTitle: 'Senior Engineer',

@@ -6,13 +6,13 @@ import { FollowUpsService } from '../follow-ups.service';
 import { ApplicationsService } from '../../applications/applications.service';
 import { FollowUpUpsertRequest } from '../../../shared/models';
 import { AutofocusDirective } from '../../../shared/directives/autofocus.directive';
+import { resolveApiErrorMessage } from '../../../shared/utils/api-error.util';
 
 @Component({
   selector: 'app-follow-up-form',
   standalone: true,
   imports: [ReactiveFormsModule, RouterLink, AutofocusDirective],
-  templateUrl: './follow-up-form.component.html',
-  styleUrl: './follow-up-form.component.scss'
+  templateUrl: './follow-up-form.component.html'
 })
 export class FollowUpFormComponent {
   private readonly fb = inject(FormBuilder);
@@ -71,7 +71,7 @@ export class FollowUpFormComponent {
     const request: FollowUpUpsertRequest = {
       jobApplicationId: raw.jobApplicationId,
       note: raw.note,
-      dueDate: new Date(raw.dueDate).toISOString()
+      dueDate: dateOnlyToIso(raw.dueDate)
     };
 
     const id = this.followUpId();
@@ -84,12 +84,29 @@ export class FollowUpFormComponent {
       },
       error: (error: HttpErrorResponse) => {
         this.saving.set(false);
-        this.errorMessage.set(error.error?.message ?? 'Could not save this follow-up.');
+        this.errorMessage.set(resolveApiErrorMessage(error, { default: 'Could not save this follow-up.' }));
       }
     });
   }
 }
 
+// A plain browser Date is always anchored to a specific instant, which only exists relative to a
+// timezone - so any UTC-based computation (Date.prototype.toISOString included) shifts the
+// calendar date near midnight for anyone not at UTC+0. This field only ever means "today" as
+// chosen on screen, not a specific instant, so it's built from the local Y/M/D components
+// directly instead of going through any UTC conversion.
 function todayIsoDate(): string {
-  return new Date().toISOString().substring(0, 10);
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// Turns a bare "YYYY-MM-DD" (from a native date input) into an ISO instant without routing it
+// through `new Date(dateOnly)` first - that constructor treats a date-only string as UTC
+// midnight, which is a JS-only quirk future edits could easily "fix" without realizing this
+// depends on it. Anchoring explicitly to UTC midnight here says exactly what's happening.
+function dateOnlyToIso(dateOnly: string): string {
+  return `${dateOnly}T00:00:00.000Z`;
 }

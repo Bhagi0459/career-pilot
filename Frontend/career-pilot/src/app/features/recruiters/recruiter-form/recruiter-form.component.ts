@@ -7,13 +7,13 @@ import { CompaniesService } from '../../companies/companies.service';
 import { CompanyQuickAddComponent } from '../../companies/company-quick-add/company-quick-add.component';
 import { Company, RecruiterUpsertRequest } from '../../../shared/models';
 import { AutofocusDirective } from '../../../shared/directives/autofocus.directive';
+import { resolveApiErrorMessage } from '../../../shared/utils/api-error.util';
 
 @Component({
   selector: 'app-recruiter-form',
   standalone: true,
   imports: [ReactiveFormsModule, RouterLink, AutofocusDirective, CompanyQuickAddComponent],
-  templateUrl: './recruiter-form.component.html',
-  styleUrl: './recruiter-form.component.scss'
+  templateUrl: './recruiter-form.component.html'
 })
 export class RecruiterFormComponent {
   private readonly fb = inject(FormBuilder);
@@ -96,7 +96,7 @@ export class RecruiterFormComponent {
       },
       error: (error: HttpErrorResponse) => {
         this.saving.set(false);
-        this.errorMessage.set(error.error?.message ?? 'Could not save this recruiter.');
+        this.errorMessage.set(resolveApiErrorMessage(error, { default: 'Could not save this recruiter.' }));
       }
     });
   }

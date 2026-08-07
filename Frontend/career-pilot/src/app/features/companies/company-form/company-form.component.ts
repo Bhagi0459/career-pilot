@@ -5,13 +5,13 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CompaniesService } from '../companies.service';
 import { CompanyUpsertRequest } from '../../../shared/models';
 import { AutofocusDirective } from '../../../shared/directives/autofocus.directive';
+import { resolveApiErrorMessage } from '../../../shared/utils/api-error.util';
 
 @Component({
   selector: 'app-company-form',
   standalone: true,
   imports: [ReactiveFormsModule, RouterLink, AutofocusDirective],
-  templateUrl: './company-form.component.html',
-  styleUrl: './company-form.component.scss'
+  templateUrl: './company-form.component.html'
 })
 export class CompanyFormComponent {
   private readonly fb = inject(FormBuilder);
@@ -75,7 +75,7 @@ export class CompanyFormComponent {
       },
       error: (error: HttpErrorResponse) => {
         this.saving.set(false);
-        this.errorMessage.set(error.error?.message ?? 'Could not save this company.');
+        this.errorMessage.set(resolveApiErrorMessage(error, { default: 'Could not save this company.' }));
       }
     });
   }

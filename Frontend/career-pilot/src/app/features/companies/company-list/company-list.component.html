@@ -80,7 +80,7 @@
 
 @if (pendingDelete(); as company) {
   <app-confirm-dialog
-    [message]="'Delete ' + company.name + '? This will also remove related recruiters and applications.'"
+    [message]="'Delete ' + company.name + '? This only works if it has no applications or recruiters attached.'"
     (confirmed)="deleteConfirmed()"
     (cancelled)="cancelDelete()"
   />

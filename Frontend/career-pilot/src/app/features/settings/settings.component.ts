@@ -8,6 +8,7 @@ import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner
 import { passwordsMatchValidator } from '../../shared/validators/passwords-match.validator';
 import { ProfileResponse } from '../../shared/models';
 import { ProfileService } from './profile.service';
+import { resolveApiErrorMessage } from '../../shared/utils/api-error.util';
 
 @Component({
   selector: 'app-settings',
@@ -54,7 +55,7 @@ export class SettingsComponent implements OnInit {
         this.profileLoading.set(false);
       },
       error: (error: HttpErrorResponse) => {
-        this.profileLoadError.set(error.error?.message ?? 'Could not load your profile.');
+        this.profileLoadError.set(resolveApiErrorMessage(error, { default: 'Could not load your profile.' }));
         this.profileLoading.set(false);
       }
     });
@@ -81,7 +82,7 @@ export class SettingsComponent implements OnInit {
       },
       error: (error: HttpErrorResponse) => {
         this.profileSaving.set(false);
-        this.profileError.set(error.error?.message ?? 'Could not save your profile.');
+        this.profileError.set(resolveApiErrorMessage(error, { default: 'Could not save your profile.' }));
       }
     });
   }
@@ -106,7 +107,9 @@ export class SettingsComponent implements OnInit {
       error: (error: HttpErrorResponse) => {
         this.passwordSaving.set(false);
         this.passwordForm.patchValue({ currentPassword: '', newPassword: '', confirmPassword: '' });
-        this.passwordError.set(error.error?.message ?? 'Could not change your password. Check your current password and try again.');
+        this.passwordError.set(
+          resolveApiErrorMessage(error, { default: 'Could not change your password. Check your current password and try again.' })
+        );
       }
     });
   }

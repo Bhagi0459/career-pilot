@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { AutofocusDirective } from '../../../shared/directives/autofocus.directive';
 import { passwordsMatchValidator } from '../../../shared/validators/passwords-match.validator';
+import { resolveApiErrorMessage } from '../../../shared/utils/api-error.util';
 
 @Component({
   selector: 'app-register',
@@ -49,7 +50,7 @@ export class RegisterComponent {
       },
       error: (error: HttpErrorResponse) => {
         this.loading.set(false);
-        this.errorMessage.set(error.error?.message ?? 'Could not create your account.');
+        this.errorMessage.set(resolveApiErrorMessage(error, { default: 'Could not create your account.' }));
       }
     });
   }
