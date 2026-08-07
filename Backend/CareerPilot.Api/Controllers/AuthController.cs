@@ -5,12 +5,14 @@ using CareerPilot.Api.Dtos;
 using CareerPilot.Api.Models;
 using CareerPilot.Api.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 namespace CareerPilot.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
+[EnableRateLimiting("auth")]
 public class AuthController(
     AppDbContext db,
     ITokenService tokenService,
@@ -26,6 +28,12 @@ public class AuthController(
     public async Task<ActionResult<AuthResponse>> Register(RegisterRequest request)
     {
         var normalizedEmail = request.Email.Trim().ToLowerInvariant();
+        var displayName = request.DisplayName.Trim();
+
+        if (displayName.Length == 0)
+        {
+            return BadRequest(new { message = "Display name can't be blank." });
+        }
 
         if (await db.Users.AnyAsync(u => u.Email == normalizedEmail))
         {
@@ -35,7 +43,7 @@ public class AuthController(
         var user = new User
         {
             Email = normalizedEmail,
-            DisplayName = request.DisplayName.Trim(),
+            DisplayName = displayName,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
         };
 

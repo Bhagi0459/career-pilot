@@ -10,7 +10,7 @@ public sealed class RegisterRequest
     [Required, EmailAddress]
     public string Email { get; init; } = string.Empty;
 
-    [Required, MinLength(8)]
+    [Required, MinLength(8), MaxLength(128)]
     public string Password { get; init; } = string.Empty;
 }
 
@@ -19,7 +19,7 @@ public sealed class LoginRequest
     [Required, EmailAddress]
     public string Email { get; init; } = string.Empty;
 
-    [Required]
+    [Required, MaxLength(128)]
     public string Password { get; init; } = string.Empty;
 }
 
@@ -33,15 +33,15 @@ public sealed class ForgotPasswordRequest
 
 public sealed class ResetPasswordRequest
 {
-    [Required]
+    [Required, MaxLength(200)]
     public string Token { get; init; } = string.Empty;
 
-    [Required, MinLength(8)]
+    [Required, MinLength(8), MaxLength(128)]
     public string NewPassword { get; init; } = string.Empty;
 }
 
 public sealed class RefreshRequest
 {
-    [Required]
+    [Required, MaxLength(200)]
     public string RefreshToken { get; init; } = string.Empty;
 }

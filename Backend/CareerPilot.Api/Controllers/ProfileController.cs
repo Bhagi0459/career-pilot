@@ -28,6 +28,12 @@ public class ProfileController(AppDbContext db) : ControllerBase
     [HttpPut]
     public async Task<ActionResult<ProfileResponse>> UpdateProfile(UpdateProfileRequest request)
     {
+        var displayName = request.DisplayName.Trim();
+        if (displayName.Length == 0)
+        {
+            return BadRequest(new { message = "Display name can't be blank." });
+        }
+
         var userId = User.GetUserId();
         var user = await db.Users.FindAsync(userId);
         if (user is null)
@@ -35,7 +41,7 @@ public class ProfileController(AppDbContext db) : ControllerBase
             return NotFound();
         }
 
-        user.DisplayName = request.DisplayName.Trim();
+        user.DisplayName = displayName;
         await db.SaveChangesAsync();
 
         return Ok(new ProfileResponse(user.DisplayName, user.Email, user.CreatedAt));

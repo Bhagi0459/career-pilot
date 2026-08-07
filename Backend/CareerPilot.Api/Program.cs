@@ -1,10 +1,12 @@
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using CareerPilot.Api.Data;
 using CareerPilot.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.OpenApi;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -109,6 +111,44 @@ builder.Services.AddCors(options =>
     });
 });
 
+// AuthController is the only public, unauthenticated surface in this API - register, login,
+// refresh, and forgot-password all let an anonymous caller trigger real work (a BCrypt hash, a
+// database write, an email send) with nothing but an IP address to identify them. Without a
+// limiter, that's an open door for credential stuffing against /login, mailbombing a victim via
+// /forgot-password, or just running the server's CPU up. One shared "auth" policy, keyed by
+// remote IP, caps this at a level generous enough for a real user (including typo/retry) but
+// well below anything useful for automated abuse. The limit is read from IConfiguration inside
+// the policy factory (called lazily, per request) rather than captured once into a local up
+// here - captured-at-startup would run before the test host finishes merging in
+// per-test-class configuration overrides, so a test-specific limit would never be seen.
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.ContentType = "application/json";
+        await context.HttpContext.Response.WriteAsJsonAsync(
+            new { message = "Too many requests. Please wait a moment and try again." },
+            cancellationToken);
+    };
+
+    options.AddPolicy("auth", httpContext =>
+    {
+        var configuration = httpContext.RequestServices.GetRequiredService<IConfiguration>();
+        var permitLimit = configuration.GetValue<int?>("RateLimiting:Auth:PermitLimit") ?? 10;
+        var windowSeconds = configuration.GetValue<int?>("RateLimiting:Auth:WindowSeconds") ?? 60;
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = permitLimit,
+                Window = TimeSpan.FromSeconds(windowSeconds),
+                QueueLimit = 0
+            });
+    });
+});
+
 builder.Services.AddProblemDetails();
 
 builder.Services.AddControllers()
@@ -193,6 +233,8 @@ else
 }
 
 app.UseCors("AllowAngular");
+
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();

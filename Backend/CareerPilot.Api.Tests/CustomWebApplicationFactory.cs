@@ -23,6 +23,13 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         // actually connect since the DbContext registration is replaced below.
         Environment.SetEnvironmentVariable("ConnectionStrings__DefaultConnection", "Host=localhost;Database=unused;Username=unused;Password=unused");
         Environment.SetEnvironmentVariable("Jwt__Key", "test-only-signing-key-do-not-use-in-production-0123456789");
+
+        // The production auth rate limit (10 requests/minute per IP) is deliberately tight
+        // against real credential-stuffing/mailbombing traffic, but every test in this suite
+        // shares one TestServer "connection" and fires many auth requests back-to-back - raise
+        // the ceiling so the limiter is exercised deliberately (RateLimitingTests) rather than
+        // incidentally tripping unrelated tests.
+        Environment.SetEnvironmentVariable("RateLimiting__Auth__PermitLimit", "100000");
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)

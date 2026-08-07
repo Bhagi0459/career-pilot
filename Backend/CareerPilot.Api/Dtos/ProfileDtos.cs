@@ -12,9 +12,9 @@ public sealed class UpdateProfileRequest
 
 public sealed class ChangePasswordRequest
 {
-    [Required]
+    [Required, MaxLength(128)]
     public string CurrentPassword { get; init; } = string.Empty;
 
-    [Required, MinLength(8)]
+    [Required, MinLength(8), MaxLength(128)]
     public string NewPassword { get; init; } = string.Empty;
 }
