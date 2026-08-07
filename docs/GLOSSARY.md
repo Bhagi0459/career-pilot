@@ -50,6 +50,10 @@ kept deliberately separate from the database model. See [03-BACKEND.md](./03-BAC
 working with ordinary classes/objects instead of writing raw SQL. See
 [02-DATABASE.md](./02-DATABASE.md).
 
+**`effect()`** — An Angular function that reruns a block of code whenever a Signal it reads
+changes, used for side effects (like driving a manual animation) rather than producing a value a
+template reads. See [05-FRONTEND.md](./05-FRONTEND.md).
+
 **Endpoint** — One specific URL + HTTP method combination an API responds to, e.g.
 `GET /api/companies`.
 

@@ -138,16 +138,42 @@ fraction of a second and then "flash" to dark once Angular's `ThemeService` catc
 but very noticeable visual glitch that's easy to prevent by doing the check earlier, in plain
 JavaScript, before any framework code runs at all.
 
+## Row actions (Edit / Delete)
+
+**Files:** every `*-list.component.html`, `offer-comparison.component.html`, `styles.scss`
+(`.icon-btn-edit` / `.icon-btn-delete`).
+
+Edit and Delete were originally two visually identical bordered buttons, told apart only by their
+text label. Edit now carries a pencil icon in the accent color; Delete carries a trash icon in
+red — a color-coded cue that one is a normal, reversible action and the other deserves a second's
+thought before clicking. Both icons are `aria-hidden="true"`, since the visible text label is
+still the accessible name for the button.
+
 ## Animation
 
 Small, deliberately restrained motion is applied throughout: modal dialogs fade and scale in
 rather than snapping into existence, list rows and dashboard cards stagger in on load, buttons
 lift slightly on hover, and the dashboard's donut chart visibly "draws itself" on load (each
-segment animates from zero to its real size) rather than just appearing fully formed. All of it
-respects the operating system's "reduce motion" accessibility setting globally — a single CSS
-rule near the top of `styles.scss` catches every animation in the app and effectively turns it off
-for anyone who's told their OS they're sensitive to motion, without needing to remember that
-setting in each individual animation.
+segment animates from zero to its real size) rather than just appearing fully formed. Two more
+additions on top of that:
+
+- **Stat cards count up.** `StatCardComponent` doesn't just print the number it's given — an
+  `effect()` watches the `value` input and animates a local `displayValue` signal from whatever it
+  last showed up to the new number over ~700ms with an eased curve, using `requestAnimationFrame`
+  directly rather than any animation library. It replays every time the value actually changes,
+  not just on first load.
+- **Rows fade out on delete.** Deleting a row no longer just vanishes the instant the list
+  refetches — the specific row gets a `row-leaving` class (opacity + slide transition) first, and
+  the actual data refresh is deferred with a `setTimeout` matched to the CSS transition's duration,
+  so the row visibly leaves before the list underneath it changes shape.
+
+All of it respects the operating system's "reduce motion" accessibility setting globally — a
+single CSS rule near the top of `styles.scss` catches every animation in the app and effectively
+turns it off for anyone who's told their OS they're sensitive to motion, without needing to
+remember that setting in each individual animation. The stat-card count-up additionally checks
+`prefers-reduced-motion` directly in its own effect and jumps straight to the final value instead
+of relying on the CSS-only blanket rule, since a `requestAnimationFrame` loop isn't something a
+`transition-duration: 0.001ms` override can intercept.
 
 Next: [07-DEPLOYMENT.md](./07-DEPLOYMENT.md) — how a change goes from your editor to the live
 site.

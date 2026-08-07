@@ -148,9 +148,9 @@ method re-runs its *entire body* every single time it's called, no matter what. 
 caches its result and only recalculates when a dependency actually changed — call
 `totalCount()` a hundred times in a row with nothing changing, and it only computes once.
 
-### Where Signals come from in this app: `signal()`, `computed()`, and `toSignal()`
+### Where Signals come from in this app: `signal()`, `computed()`, `toSignal()`, and `effect()`
 
-You'll see three ways a Signal gets created in this codebase:
+You'll see four ways a Signal gets created or reacted to in this codebase:
 
 1. **`signal(initialValue)`** — a plain, writable Signal you manually `set()`/`update()`. Used
    for local component state like `saving = signal(false)` or `showCompanyModal = signal(false)`.
@@ -167,6 +167,14 @@ You'll see three ways a Signal gets created in this codebase:
    bridges that stream into a Signal so the rest of the component — which is written in the
    Signals style — can read `selectedCompanyId()` like any other Signal, and any `computed()`
    built on top of it (like `filteredRecruiters` in that same file) updates automatically too.
+4. **`effect(() => ...)`** — runs a side effect whenever a Signal it reads changes, rather than
+   producing a new Signal itself. Unlike `computed()`, an effect doesn't return a value the
+   template can read — it's for reacting to a change by *doing* something (starting an animation,
+   logging, syncing to `localStorage`). The one example in this codebase,
+   `StatCardComponent`, uses an `effect()` that watches its `value` input and kicks off a
+   `requestAnimationFrame` loop counting up to the new number whenever it changes — the animation
+   itself lives outside the Signal graph (raw DOM/timing APIs), so `effect()` is the deliberate
+   escape hatch for that, rather than trying to force it into a `computed()`.
 
 ## Signals vs. RxJS Observables — when this codebase uses which
 
