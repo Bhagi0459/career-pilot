@@ -8,3 +8,6 @@
 Backend/**/appsettings.Local.json
 Backend/**/appsettings.Production.json
 Backend/**/appsettings.*.local.json
+
+# Local editor/tooling config (machine-specific, not shared)
+.claude/

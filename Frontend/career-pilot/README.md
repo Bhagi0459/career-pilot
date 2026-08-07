@@ -6,10 +6,12 @@ Angular frontend for [CareerPilot](../../README.md), a full-stack job applicatio
 
 ## Features
 
-- Dashboard overview of applications, interviews, and pipeline status
-- Applications, Companies, Recruiters, and Interviews feature modules
-- JWT-based authentication with account settings
+- Dashboard overview of applications, interviews, follow-ups, and pipeline status
+- Applications (with an Offer Comparison view), Companies, Recruiters, Interviews, and Follow-ups
+  feature modules
+- JWT-based authentication (with silent refresh) and account settings
 - RxJS-driven search and filtering, Signals-based reactive state with computed values
+- Light/dark theming and motion, both respecting the OS "reduce motion" setting
 
 ## Tech stack
 
@@ -30,6 +32,7 @@ src/app/
     companies/
     recruiters/
     interviews/
+    follow-ups/
     settings/
   shared/         # shared UI building blocks
 ```
